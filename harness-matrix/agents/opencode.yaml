@@ -115,8 +115,8 @@ edit:
         ref: opencode/packages/opencode/src/tool/apply_patch.ts:43
         quote: "throw new Error(\"apply_patch verification failed: no hunks found\")"
       - kind: code
-        ref: opencode/packages/opencode/src/tool/edit.ts:650
-        quote: "Could not find oldString in the file"
+        ref: opencode/packages/opencode/src/tool/edit.ts:651
+        quote: "Could not find oldString in the file. It must match exactly, including whitespace, indentation, and line endings."
       - kind: code
         ref: opencode/packages/opencode/src/tool/edit.ts:654
         quote: "Found multiple matches for oldString"
@@ -187,7 +187,7 @@ tools:
         quote: "InvalidTool,"
       - kind: code
         ref: opencode/packages/opencode/src/tool/registry.ts:107
-        quote: "TaskTool, WebFetchTool, TodoWriteTool, WebSearchTool, CodeSearchTool, SkillTool, ApplyPatchTool"
+        quote: "TaskTool,"
       - kind: code
         ref: opencode/packages/opencode/src/tool/registry.ts:36
         quote: "const glob = new Bun.Glob(\"{tool,tools}/*.{js,ts}\")"
@@ -212,11 +212,11 @@ tools:
         quote: "patchText: z.string()"
   sandbox:
     value: "No hard OS sandbox is implemented in tool runner. Boundaries are permission rules (`allow`/`ask`/`deny`) plus explicit `external_directory` checks; shell runs via local spawn."
-    confidence: high
+    confidence: medium
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/permissions.mdx:16
-        quote: '"allow" — run without approval'
+        quote: '`"allow"` — run without approval'
       - kind: code
         ref: opencode/packages/opencode/src/permission/next.ts:242
         quote: "return match ?? { action: \"ask\", permission, pattern: \"*\" }"
@@ -282,10 +282,10 @@ config:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/config.mdx:120
-        quote: "Specify a custom config file path using the OPENCODE_CONFIG environment variable."
+        quote: "Specify a custom config file path using the `OPENCODE_CONFIG` environment variable."
       - kind: docs
         ref: opencode/packages/web/src/content/docs/config.mdx:133
-        quote: "Specify a custom config directory using the OPENCODE_CONFIG_DIR"
+        quote: "Specify a custom config directory using the `OPENCODE_CONFIG_DIR`"
       - kind: code
         ref: opencode/packages/opencode/src/flag/flag.ts:11
         quote: "export const OPENCODE_CONFIG_CONTENT = process.env[\"OPENCODE_CONFIG_CONTENT\"]"
@@ -303,7 +303,7 @@ config:
         quote: "if (Flag.OPENCODE_DISABLE_PRUNE)"
       - kind: code
         ref: opencode/packages/opencode/src/flag/flag.ts:44
-        quote: "export const OPENCODE_ENABLE_EXA = truthy(\"OPENCODE_ENABLE_EXA\")"
+        quote: "export const OPENCODE_ENABLE_EXA ="
 extensions:
   skills:
     supported:
@@ -335,7 +335,7 @@ extensions:
           ref: opencode/packages/web/src/content/docs/skills.mdx:20
           quote: "Project agent-compatible: `.agents/skills/<name>/SKILL.md`"
         - kind: code
-          ref: opencode/packages/opencode/src/skill/skill.ts:136
+          ref: opencode/packages/opencode/src/skill/skill.ts:138
           quote: "for (const skillPath of config.skills?.paths ?? [])"
         - kind: code
           ref: opencode/packages/opencode/src/skill/skill.ts:156
@@ -362,7 +362,7 @@ extensions:
         quote: "Specify npm packages in your config file."
       - kind: docs
         ref: opencode/packages/web/src/content/docs/plugins.mdx:48
-        quote: "npm plugins are installed automatically using Bun at startup"
+        quote: "**npm plugins** are installed automatically using Bun at startup."
       - kind: code
         ref: opencode/packages/opencode/src/plugin/index.ts:101
         quote: "export async function trigger<"
@@ -418,7 +418,7 @@ providers:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/providers.mdx:9
-        quote: "support 75+ LLM providers"
+        quote: "support **75+ LLM providers** and it supports running local models."
       - kind: code
         ref: opencode/packages/opencode/src/provider/provider.ts:60
         quote: "const BUNDLED_PROVIDERS: Record<string, (options: any) => SDK> = {"
@@ -430,8 +430,8 @@ providers:
     confidence: high
     evidence:
       - kind: docs
-        ref: opencode/packages/web/src/content/docs/providers.mdx:20
-        quote: "stored in `~/.local/share/opencode/auth.json`."
+        ref: opencode/packages/web/src/content/docs/providers.mdx:21
+        quote: "in `~/.local/share/opencode/auth.json`."
       - kind: code
         ref: opencode/packages/opencode/src/auth/index.ts:34
         quote: "export const Info = z.discriminatedUnion(\"type\", [Oauth, Api, WellKnown])"
@@ -446,7 +446,7 @@ providers:
         ref: opencode/packages/opencode/src/cli/cmd/run.ts:251
         quote: "describe: \"model to use in the format of provider/model\","
       - kind: code
-        ref: opencode/packages/opencode/src/provider/provider.ts:1231
+        ref: opencode/packages/opencode/src/provider/provider.ts:1232
         quote: "if (cfg.model) return parseModel(cfg.model)"
       - kind: code
         ref: opencode/packages/opencode/src/provider/provider.ts:1235
@@ -461,7 +461,7 @@ ux:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/cli.mdx:8
-        quote: "The OpenCode CLI by default starts the TUI"
+        quote: "The OpenCode CLI by default starts the [TUI](/docs/tui)"
       - kind: docs
         ref: opencode/packages/web/src/content/docs/cli.mdx:17
         quote: "opencode run \"Explain how closures work in JavaScript\""
@@ -487,7 +487,7 @@ ux:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/permissions.mdx:16
-        quote: '"allow" — run without approval'
+        quote: '`"allow"` — run without approval'
       - kind: docs
         ref: opencode/packages/web/src/content/docs/permissions.mdx:176
         quote: "`once` — approve just this request"
@@ -508,8 +508,8 @@ ux:
         ref: opencode/packages/web/src/content/docs/cli.mdx:34
         quote: "`--continue` | `-c`  | Continue the last session"
       - kind: code
-        ref: opencode/packages/opencode/src/cli/cmd/run.ts:240
-        quote: 'option("fork", { describe: "fork the session before continuing" })'
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:241
+        quote: "describe: \"fork the session before continuing (requires --continue or --session)\","
 context:
   compaction:
     value: "Automatic compaction is token-threshold based (`reserved` buffer) and configurable (`compaction.auto`, `compaction.prune`, `compaction.reserved`); compaction can auto-insert a synthetic continue message."
@@ -520,7 +520,7 @@ context:
         quote: "if (config.compaction?.auto === false) return false"
       - kind: code
         ref: opencode/packages/opencode/src/session/compaction.ts:43
-        quote: "const reserved = config.compaction?.reserved"
+        quote: "config.compaction?.reserved ?? Math.min(COMPACTION_BUFFER, ProviderTransform.maxOutputTokens(input.model))"
       - kind: docs
         ref: opencode/packages/web/src/content/docs/config.mdx:499
         quote: "`auto` - Automatically compact the session when context is full"
@@ -543,7 +543,7 @@ context:
 reliability:
   auto_retry:
     value: "Automatic retry is enabled for retryable provider/API failures with exponential backoff and `Retry-After` header support; no explicit user-facing disable switch was found in scanned docs/code."
-    confidence: high
+    confidence: medium
     evidence:
       - kind: code
         ref: opencode/packages/opencode/src/session/processor.ts:359
@@ -552,7 +552,7 @@ reliability:
         ref: opencode/packages/opencode/src/session/processor.ts:369
         quote: "await SessionRetry.sleep(delay, input.abort)"
       - kind: code
-        ref: opencode/packages/opencode/src/session/retry.ts:31
+        ref: opencode/packages/opencode/src/session/retry.ts:32
         quote: "const retryAfterMs = headers[\"retry-after-ms\"]"
       - kind: code
         ref: opencode/packages/opencode/src/session/retry.ts:58
@@ -566,7 +566,7 @@ reliability:
         quote: "const DOOM_LOOP_THRESHOLD = 3"
       - kind: code
         ref: opencode/packages/opencode/src/session/processor.ts:165
-        quote: "await PermissionNext.ask({ permission: \"doom_loop\""
+        quote: "await PermissionNext.ask({"
       - kind: code
         ref: opencode/packages/opencode/src/session/processor.ts:412
         quote: "if (needsCompaction) return \"compact\""
@@ -590,7 +590,7 @@ integration:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/cli.mdx:8
-        quote: "CLI by default starts the TUI"
+        quote: "The OpenCode CLI by default starts the [TUI](/docs/tui)"
       - kind: code
         ref: opencode/packages/opencode/src/cli/cmd/run.ts:216
         quote: 'command: "run [message..]"'
@@ -606,7 +606,7 @@ integration:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/server.mdx:50
-        quote: "server exposes an OpenAPI 3.1 spec endpoint"
+        quote: "client that talks to the server. The server exposes an OpenAPI 3.1 spec"
       - kind: docs
         ref: opencode/packages/web/src/content/docs/server.mdx:95
         quote: "Get global events (SSE stream)"
@@ -641,8 +641,8 @@ customization:
         ref: opencode/packages/web/src/content/docs/commands.mdx:33
         quote: "The frontmatter defines command properties. The content becomes the template."
       - kind: code
-        ref: opencode/packages/opencode/src/config/config.ts:656
-        quote: "export const Command = z.object({ template: z.string()"
+        ref: opencode/packages/opencode/src/config/config.ts:657
+        quote: "template: z.string(),"
       - kind: code
         ref: opencode/packages/opencode/src/config/config.ts:342
         quote: "const COMMAND_GLOB = new Bun.Glob(\"{command,commands}/**/*.md\")"
@@ -698,7 +698,7 @@ distribution:
         quote: "brew install anomalyco/tap/opencode"
       - kind: docs
         ref: opencode/README.md:65
-        quote: "Download directly from the releases page"
+        quote: "Download directly from the [releases page](https://github.com/anomalyco/opencode/releases)"
 packages:
   install_locations:
     value:
@@ -719,7 +719,7 @@ packages:
         quote: "4. `$HOME/.opencode/bin`"
 extras:
   tools.model_conditional_exposure:
-    value: "tool strategy changes by model family, which can affect patch/edit reliability and prompt behavior."
+    value: "Tool registry toggles `apply_patch` versus `edit`/`write` exposure based on model ID checks."
     confidence: high
     evidence:
       - kind: code
@@ -732,7 +732,7 @@ extras:
         ref: opencode/packages/opencode/src/tool/registry.ts:146
         quote: "if (t.id === \"edit\" || t.id === \"write\") return !usePatch"
   integration.local_rpc_mode:
-    value: "TUI can run without local HTTP by using worker RPC, useful for embedding and reduced network surface."
+    value: "TUI worker thread supports direct RPC communication without HTTP."
     confidence: high
     evidence:
       - kind: code
@@ -742,7 +742,7 @@ extras:
         ref: opencode/packages/opencode/src/cli/cmd/tui/thread.ts:20
         quote: "function createWorkerFetch(client: RpcClient): typeof fetch {"
   reliability.loop_guard_doom_loop:
-    value: "explicit repeated-tool-call guard can prevent runaway loops and cost blowups."
+    value: "Session processing uses a doom-loop threshold of three repeated tool calls before asking permission."
     confidence: high
     evidence:
       - kind: code
@@ -752,7 +752,7 @@ extras:
         ref: opencode/packages/opencode/src/session/processor.ts:165
         quote: "await PermissionNext.ask({"
   config.variable_substitution:
-    value: "{env:...} and {file:...} substitution materially changes portability and secret handling."
+    value: "Config interpolation replaces `{env:...}` variables and resolves `{file:...}` references."
     confidence: high
     evidence:
       - kind: code

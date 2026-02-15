@@ -1,6 +1,6 @@
 ## Normalization summary (`opencode`)
 
-- Replaced placeholder-style `quote:` snippets with exact source excerpts for all affected evidence items.
-- Added `edit.mechanism_default` (model-conditional default surfaced as `apply_patch`, medium confidence) and preserved conditional behavior detail in evidence and extras.
-- Added `extras.*` entries from `reports/opencode.md`: `tools.model_conditional_exposure`, `integration.local_rpc_mode`, `reliability.loop_guard_doom_loop`, and `config.variable_substitution`.
+- Applied every blocking fix from `reports/opencode-review.md` (line-accurate refs and exact quote substrings) across `edit.verification`, `tools.*`, `config.*`, `extensions.*`, `providers.*`, `ux.*`, `context.compaction`, `reliability.recovery_loops`, `integration.*`, `customization.prompt_templates`, and `distribution.artifacts`.
+- Downgraded `tools.sandbox.confidence` and `reliability.auto_retry.confidence` from `high` to `medium` per reviewer guidance.
+- Rewrote `extras.tools.model_conditional_exposure`, `extras.integration.local_rpc_mode`, `extras.reliability.loop_guard_doom_loop`, and `extras.config.variable_substitution` values as factual capability statements.
 - Kept all existing claims; no fields were removed for missing evidence.

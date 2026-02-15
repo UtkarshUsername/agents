@@ -57,7 +57,7 @@ platforms:
   evidence:
     - kind: docs
       ref: codex/docs/install.md:7
-      quote: "macOS 12+, Ubuntu 20.04+/Debian 10+, or Windows 11 via WSL2"
+      quote: "Windows 11 **via WSL2**"
 edit:
   mechanism:
     value: [apply_patch]
@@ -80,21 +80,21 @@ edit:
         ref: codex/codex-rs/apply-patch/src/lib.rs:386
         quote: "If a chunk has a `change_context`, we use seek_sequence to find it"
       - kind: code
-        ref: codex/codex-rs/apply-patch/src/lib.rs:397
+        ref: codex/codex-rs/apply-patch/src/lib.rs:398
         quote: "Failed to find context '{}' in {}"
       - kind: code
         ref: codex/codex-rs/apply-patch/src/lib.rs:455
         quote: "Failed to find expected lines in {}"
   verification:
     value: "Reject-on-mismatch: patch input is reparsed/verified before apply; parse/context errors fail the call; no fuzzy merge path."
-    confidence: high
+    confidence: medium
     evidence:
       - kind: code
         ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:103
         quote: "Re-parse and verify the patch"
       - kind: code
-        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:166
-        quote: "apply_patch verification failed"
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:168
+        quote: "apply_patch verification failed: {parse_error}"
       - kind: code
         ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:174
         quote: "apply_patch handler received invalid patch input"
@@ -132,7 +132,7 @@ edit:
         ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:98
         quote: "apply_patch handler received unsupported payload"
       - kind: code
-        ref: codex/codex-rs/apply-patch/src/lib.rs:454
+        ref: codex/codex-rs/apply-patch/src/lib.rs:455
         quote: "Failed to find expected lines in {}"
       - kind: code
         ref: codex/codex-rs/apply-patch/src/lib.rs:347
@@ -223,7 +223,7 @@ tools:
         ref: codex/codex-rs/core/src/sandboxing/mod.rs:181
         quote: "SandboxType::LinuxSeccomp"
       - kind: code
-        ref: codex/codex-rs/core/src/sandboxing/mod.rs:204
+        ref: codex/codex-rs/core/src/sandboxing/mod.rs:205
         quote: "SandboxType::WindowsRestrictedToken"
       - kind: code
         ref: codex/codex-rs/core/src/tools/sandboxing.rs:160
@@ -248,7 +248,7 @@ config:
         quote: "Configuration is built up from multiple layers in the following order"
       - kind: code
         ref: codex/codex-rs/core/src/config_loader/mod.rs:88
-        quote: "user `${CODEX_HOME}/config.toml`"
+        quote: "`${CODEX_HOME}/config.toml`"
       - kind: code
         ref: codex/codex-rs/core/src/config_loader/mod.rs:90
         quote: "tree      parent directories up to root looking for `./.codex/config.toml`"
@@ -286,10 +286,10 @@ config:
         quote: "exporting `OPENAI_BASE_URL`"
       - kind: code
         ref: codex/codex-rs/core/src/model_provider_info.rs:243
-        quote: "`OPENAI_ORGANIZATION`"
+        quote: "\"OPENAI_ORGANIZATION\".to_string(),"
       - kind: code
         ref: codex/codex-rs/core/src/model_provider_info.rs:245
-        quote: "`OPENAI_PROJECT`"
+        quote: "(\"OpenAI-Project\".to_string(), \"OPENAI_PROJECT\".to_string()),"
       - kind: code
         ref: codex/codex-rs/core/src/model_provider_info.rs:299
         quote: "std::env::var(\"CODEX_OSS_PORT\")"
@@ -378,7 +378,7 @@ extensions:
         ref: codex/codex-rs/cli/src/main.rs:96
         quote: "Manage external MCP servers for Codex"
       - kind: code
-        ref: codex/codex-rs/core/src/config/types.rs:232
+        ref: codex/codex-rs/core/src/config/types.rs:234
         quote: "pub enum McpServerTransportConfig"
 providers:
   supported:
@@ -403,7 +403,7 @@ providers:
         quote: "LMSTUDIO_OSS_PROVIDER_ID"
       - kind: code
         ref: codex/codex-rs/core/src/model_provider_info.rs:5
-        quote: "User-defined entries inside `~/.codex/config.toml` under the `model_providers` key"
+        quote: "User-defined entries inside `~/.codex/config.toml` under the `model_providers`"
   auth:
     value: "Provider auth supports OpenAI login/auth token flow (`requires_openai_auth`) and environment-based API keys via `env_key`/`api_key()` lookup."
     confidence: high
@@ -535,15 +535,15 @@ reliability:
     evidence:
       - kind: code
         ref: codex/codex-rs/core/src/codex.rs:4805
-        quote: "if !err.is_retryable() { return Err(err); }"
+        quote: "if !err.is_retryable() {"
       - kind: code
         ref: codex/codex-rs/core/src/codex.rs:4810
         quote: "let max_retries = turn_context.provider.stream_max_retries();"
       - kind: code
-        ref: codex/codex-rs/core/src/codex.rs:4827
+        ref: codex/codex-rs/core/src/codex.rs:4829
         quote: "requested_delay.unwrap_or_else(|| backoff(retries))"
       - kind: code
-        ref: codex/codex-rs/core/src/model_provider_info.rs:159
+        ref: codex/codex-rs/core/src/model_provider_info.rs:160
         quote: "max_attempts: self.request_max_retries()"
       - kind: code
         ref: codex/codex-rs/core/src/model_provider_info.rs:163
@@ -563,7 +563,7 @@ reliability:
         quote: "Falling back from WebSockets to HTTPS transport"
       - kind: code
         ref: codex/codex-rs/core/src/codex.rs:4479
-        quote: "if state.history.replace_last_turn_images(\"Invalid image\") { continue; }"
+        quote: "if state.history.replace_last_turn_images(\"Invalid image\") {"
       - kind: code
         ref: codex/codex-rs/core/src/compact.rs:170
         quote: "Trim from the beginning to preserve cache (prefix-based) and keep recent messages intact."
@@ -631,7 +631,7 @@ customization:
         quote: "Developer instructions"
       - kind: code
         ref: codex/codex-rs/core/src/config/mod.rs:908
-        quote: "model instructions file"
+        quote: "Optional path to a file containing model instructions that will override"
       - kind: code
         ref: codex/codex-rs/core/src/config/mod.rs:1427
         quote: "let user_instructions = Self::load_instructions(Some(&codex_home));"
@@ -640,7 +640,7 @@ customization:
         quote: "for candidate in [LOCAL_PROJECT_DOC_FILENAME, DEFAULT_PROJECT_DOC_FILENAME]"
       - kind: code
         ref: codex/codex-rs/core/src/project_doc.rs:11
-        quote: "Collect every `AGENTS.md` found from the repository root down to the current working directory"
+        quote: "Collect every `AGENTS.md` found from the repository root down to the"
   prompt_templates:
     value: "Built-in instruction templates are Markdown files embedded via `include_str!`; user custom prompts load from `$CODEX_HOME/prompts` as `.md` files with optional frontmatter keys (`description`, `argument-hint`)."
     confidence: high
@@ -718,7 +718,7 @@ packages:
         quote: "brew install --cask codex"
 extras:
   integration.app_server_protocol_versioning:
-    value: "Harness pickers embedding Codex need to know transport/message compatibility and generation workflow."
+    value: "App-server protocol outputs and generated TypeScript bindings are specific to the Codex version used."
     confidence: high
     evidence:
       - kind: docs
@@ -731,7 +731,7 @@ extras:
         ref: codex/codex-rs/cli/src/main.rs:339
         quote: "/// [experimental] Generate TypeScript bindings for the app server protocol."
   reliability.transport_fallbacks:
-    value: "Automatic fallback from WebSocket streaming to HTTPS can reduce outage impact in unstable networks."
+    value: "Codex can switch from WebSockets to HTTPS as a fallback transport during retry handling."
     confidence: high
     evidence:
       - kind: code
@@ -741,7 +741,7 @@ extras:
         ref: codex/codex-rs/core/src/codex.rs:4818
         quote: "message: format!(\"Falling back from WebSockets to HTTPS transport. {err:#}\"),"
   skills.system_skill_cache:
-    value: "System-skill cache location/install behavior affects reproducibility and policy controls in managed environments."
+    value: "Embedded system skills are installed into `CODEX_HOME/skills/.system`."
     confidence: high
     evidence:
       - kind: code
@@ -751,7 +751,7 @@ extras:
         ref: codex/codex-rs/core/src/skills/system.rs:40
         quote: "/// Installs embedded system skills into `CODEX_HOME/skills/.system`."
   ux.event_opt_out_controls:
-    value: "Clients integrating event streams may need fine-grained event suppression for performance/noise control."
+    value: "App-server clients can suppress selected notifications per connection by method name."
     confidence: high
     evidence:
       - kind: docs

@@ -10,8 +10,8 @@ name:
   confidence: high
   evidence:
     - kind: docs
-      ref: pi-mono/packages/coding-agent/README.md:26
-      quote: "Looking for the pi coding agent?"
+      ref: pi-mono/README.md:26
+      quote: "**Looking for the pi coding agent?**"
 repo:
   url:
     value: https://github.com/badlogic/pi-mono.git
@@ -57,10 +57,10 @@ platforms:
   evidence:
     - kind: docs
       ref: pi-mono/packages/coding-agent/docs/terminal-setup.md:32
-      quote: "macOS: ~/Library/Application Support/Code/User/keybindings.json"
+      quote: "`~/Library/Application Support/Code/User/keybindings.json`"
     - kind: docs
       ref: pi-mono/packages/coding-agent/docs/terminal-setup.md:33
-      quote: "Linux: ~/.config/Code/User/keybindings.json"
+      quote: "`~/.config/Code/User/keybindings.json`"
     - kind: docs
       ref: pi-mono/packages/coding-agent/docs/windows.md:1
       quote: "# Windows Setup"
@@ -111,7 +111,7 @@ edit:
     evidence:
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:217
-        quote: "if (!aborted) { reject(error); }"
+        quote: "reject(error);"
       - kind: code
         ref: pi-mono/packages/agent/src/agent-loop.ts:333
         quote: "} catch (e) {"
@@ -150,7 +150,7 @@ tools:
         quote: "Available built-in tools: `read`, `bash`, `edit`, `write`, `grep`, `find`, `ls`"
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/extensions.md:10
-        quote: "Custom tools - Register tools the LLM can call via `pi.registerTool()`"
+        quote: "**Custom tools** - Register tools the LLM can call via `pi.registerTool()`"
   schema_style:
     value: "TypeBox JSON-schema-like parameter objects, validated before tool execution."
     confidence: high
@@ -270,7 +270,7 @@ extensions:
           ref: pi-mono/packages/coding-agent/docs/skills.md:89
           quote: "A skill is a directory with a `SKILL.md` file."
         - kind: docs
-          ref: pi-mono/packages/coding-agent/docs/skills.md:104
+          ref: pi-mono/packages/coding-agent/docs/skills.md:102
           quote: "### SKILL.md Format"
   plugins:
     value: "TypeScript extension API plus pi package ecosystem; extensions can register tools/commands/flags/providers and intercept tool calls/results."
@@ -287,7 +287,7 @@ extensions:
         quote: "Pi packages bundle extensions, skills, prompt templates, and themes"
   mcp:
     value: "No built-in MCP in core harness; MCP integration is expected via extensions."
-    confidence: high
+    confidence: medium
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:413
@@ -376,7 +376,7 @@ ux:
         quote: "session.subscribe((event) => {"
   review_controls:
     value: "No built-in permission popup approvals in core; confirmation gates can be added by extensions."
-    confidence: high
+    confidence: medium
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:417
@@ -395,8 +395,8 @@ ux:
         ref: pi-mono/packages/coding-agent/README.md:206
         quote: "Sessions auto-save to `~/.pi/agent/sessions/`"
       - kind: code
-        ref: pi-mono/packages/coding-agent/src/core/session-manager.ts:420
-        quote: "Compute the default session directory"
+        ref: pi-mono/packages/coding-agent/src/core/session-manager.ts:417
+        quote: "Compute the default session directory for a cwd."
 
 context:
   compaction:
@@ -407,7 +407,7 @@ context:
         ref: pi-mono/packages/coding-agent/docs/compaction.md:20
         quote: "Compaction | Context exceeds threshold, or `/compact`"
       - kind: docs
-        ref: pi-mono/packages/coding-agent/docs/compaction.md:31
+        ref: pi-mono/packages/coding-agent/docs/compaction.md:32
         quote: "contextTokens > contextWindow - reserveTokens"
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/settings-manager.ts:470
@@ -423,7 +423,7 @@ context:
         ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1598
         quote: "await this._runAutoCompaction(\"overflow\", true);"
       - kind: code
-        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1728
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1729
         quote: "this.agent.continue().catch(() => {});"
 
 reliability:
@@ -451,7 +451,7 @@ reliability:
         ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1618
         quote: "this._emit({ type: \"auto_compaction_start\", reason });"
       - kind: code
-        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:2129
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:2130
         quote: "type: \"auto_retry_start\""
 
 integration:
@@ -487,10 +487,10 @@ integration:
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/rpc.md:21
-        quote: "Commands: JSON objects sent to stdin, one per line"
+        quote: "**Commands**: JSON objects sent to stdin, one per line"
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/rpc.md:23
-        quote: "Events: Agent events streamed to stdout as JSON lines"
+        quote: "**Events**: Agent events streamed to stdout as JSON lines"
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/json.md:57
         quote: "Each line is a JSON object."
@@ -504,7 +504,7 @@ customization:
         ref: pi-mono/packages/coding-agent/README.md:263
         quote: "Replace the default system prompt with `.pi/SYSTEM.md` (project) or `~/.pi/agent/SYSTEM.md` (global)."
       - kind: code
-        ref: pi-mono/packages/coding-agent/src/core/resource-loader.ts:745
+        ref: pi-mono/packages/coding-agent/src/core/resource-loader.ts:746
         quote: "const projectPath = join(this.cwd, CONFIG_DIR_NAME, \"SYSTEM.md\")"
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:504
@@ -562,10 +562,10 @@ distribution:
         quote: "npm install -g @mariozechner/pi-coding-agent"
       - kind: code
         ref: pi-mono/packages/coding-agent/package.json:10
-        quote: '"bin": { "pi": "dist/cli.js" }'
+        quote: '"bin": {'
       - kind: code
         ref: pi-mono/packages/coding-agent/package.json:35
-        quote: '"build:binary": "npm run build && bun build --compile ./dist/cli.js --outfile dist/pi"'
+        quote: '"build:binary": "npm run build && bun build --compile ./dist/cli.js --outfile dist/pi && npm run copy-binary-assets",'
 
 packages:
   install_locations:
