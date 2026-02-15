@@ -15,7 +15,7 @@ You do the coding. Do not change dataset content except for mechanical build int
 
 ## Output
 
-A static site (Astro/Next/etc. ok) that:
+A static site (Astro) that:
 
 - Loads YAML at build time
 - Renders a compare matrix and per-harness detail pages
@@ -57,7 +57,6 @@ A static site (Astro/Next/etc. ok) that:
 
 ## Quality Bar
 
-- Mobile-first, fast, and readable.
+- Responsive, fast, and readable.
 - No broken pages if a field is missing; degrade gracefully.
 - No “AI slop” styling; this should look like a credible standards reference.
-

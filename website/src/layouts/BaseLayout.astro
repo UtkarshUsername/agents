@@ -1,0 +1,50 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Source-backed comparison of AI coding agent harnesses.' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title} · Harness Matrix</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <nav>
+      <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
+        <a href="/" style="font-family:var(--font-mono);font-size:var(--fs-md);font-weight:700;color:var(--c-text-heading);letter-spacing:-0.02em;">
+          <span style="color:var(--c-accent);">▪</span> Harness Matrix
+        </a>
+        <div style="display:flex;gap:var(--sp-6);">
+          <a href="/compare">Compare</a>
+          <a href="/contribute">Contribute</a>
+        </div>
+      </div>
+    </nav>
+
+    <main class="container" style="padding-top:var(--sp-16);padding-bottom:var(--sp-12);">
+      <slot />
+    </main>
+
+    <footer>
+      <div class="container" style="text-align:center;">
+        Harness Matrix · Source-backed harness comparison · Every claim has evidence
+      </div>
+    </footer>
+  </body>
+</html>

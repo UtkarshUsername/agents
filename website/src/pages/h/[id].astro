@@ -1,0 +1,221 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import {
+  loadAllHarnesses,
+  loadHarness,
+  getFieldSafe,
+  getSections,
+  makeEvidenceUrl,
+} from '../../data/loader';
+import type { Evidence, Field, Section, SectionField } from '../../data/loader';
+
+export function getStaticPaths() {
+  const harnesses = loadAllHarnesses();
+  return harnesses.map(h => ({
+    params: { id: h.id.value },
+  }));
+}
+
+const harness = loadHarness(Astro.params.id!);
+if (!harness) return Astro.redirect('/404');
+
+const name = getFieldSafe(harness, 'name').value ?? harness.id.value;
+const repoUrl = getFieldSafe(harness, 'repo', 'url').value;
+const pinnedCommit = getFieldSafe(harness, 'repo', 'pinned_commit').value;
+const shortCommit = pinnedCommit ? String(pinnedCommit).slice(0, 7) : null;
+const license = getFieldSafe(harness, 'license').value;
+const language = getFieldSafe(harness, 'primary_language').value;
+const platforms = getFieldSafe(harness, 'platforms').value;
+const platformList: string[] = Array.isArray(platforms) ? platforms : platforms ? [String(platforms)] : [];
+
+const sections = getSections(harness);
+
+function renderValue(val: any): string {
+  if (val == null) return '—';
+  if (Array.isArray(val)) {
+    if (val.length === 0) return '—';
+    if (typeof val[0] === 'string' || typeof val[0] === 'number' || typeof val[0] === 'boolean') {
+      return val.join(', ');
+    }
+    return '';
+  }
+  if (typeof val === 'object') return '';
+  return String(val);
+}
+
+function isObjectArray(val: any): boolean {
+  return Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && val[0] !== null;
+}
+
+function isPlainObject(val: any): boolean {
+  return val != null && typeof val === 'object' && !Array.isArray(val);
+}
+
+function objectEntries(val: any): [string, any][] {
+  if (val && typeof val === 'object') return Object.entries(val);
+  return [];
+}
+
+function evUrl(ev: Evidence): string | null {
+  return makeEvidenceUrl(harness!, ev.ref);
+}
+---
+
+<BaseLayout title={name}>
+  <!-- Hero -->
+  <header class="fade-in" style="padding-bottom:var(--sp-8);border-bottom:1px solid var(--c-border);margin-bottom:var(--sp-8);">
+    <h1 style="margin-bottom:var(--sp-3);">{name}</h1>
+
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-4);">
+      {repoUrl && (
+        <a
+          href={repoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="mono"
+          style="font-size:var(--fs-sm);color:var(--c-accent);text-decoration:underline;text-underline-offset:3px;"
+        >
+          {String(repoUrl).replace(/\.git$/, '')}
+        </a>
+      )}
+      {shortCommit && (
+        <code
+          class="badge"
+          style="background:var(--c-surface-raise);color:var(--c-text-muted);border-color:var(--c-border);"
+          title={String(pinnedCommit)}
+        >
+          {shortCommit}
+        </code>
+      )}
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:var(--sp-2);">
+      {license && <span class="badge badge--high">{license}</span>}
+      {language && <span class="badge badge--medium">{language}</span>}
+      {platformList.map(p => (
+        <span class="badge" style="color:var(--c-text);background:var(--c-surface-raise);border-color:var(--c-border);">{p}</span>
+      ))}
+    </div>
+  </header>
+
+  <!-- Sections -->
+  {sections.map((section, si) => {
+    const stagger = Math.min(si + 1, 4);
+    return (
+      <section class={`fade-in-up stagger-${stagger}`}>
+        <div class="section-header">
+          <h2>{section.name}</h2>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:var(--sp-6);margin-bottom:var(--sp-8);">
+          {section.fields.map(sf => {
+            const val = sf.field.value;
+            if (val == null) return null;
+
+            const confidence = sf.field.confidence;
+            const evidence = sf.field.evidence || [];
+            const simple = renderValue(val);
+            const objArr = isObjectArray(val);
+            const plainObj = !objArr && isPlainObject(val);
+
+            return (
+              <div class="card" style="padding:var(--sp-4) var(--sp-6);">
+                <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-2);">
+                  <span class="mono" style="font-weight:600;font-size:var(--fs-sm);color:var(--c-text-heading);">
+                    {sf.label}
+                  </span>
+                  {confidence && (
+                    <span class={`badge badge--${confidence}`}>{confidence}</span>
+                  )}
+                </div>
+
+                {simple && simple !== '' && (
+                  <p style="color:var(--c-text);font-size:var(--fs-sm);">{simple}</p>
+                )}
+
+                {objArr && (
+                  <ul style="display:flex;flex-direction:column;gap:var(--sp-2);margin-top:var(--sp-2);">
+                    {(val as any[]).map(item => (
+                      <li style="background:var(--c-surface-raise);border:1px solid var(--c-border-subtle);border-radius:var(--r-sm);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-sm);">
+                        {item.mode && (
+                          <span class="mono" style="font-weight:600;color:var(--c-text-heading);">{item.mode}</span>
+                        )}
+                        {item.detail && (
+                          <span class="muted" style="margin-left:var(--sp-2);">{item.detail}</span>
+                        )}
+                        {!item.mode && !item.detail && objectEntries(item).map(entry => (
+                          <span style="margin-right:var(--sp-3);">
+                            <span class="mono muted">{entry[0]}:</span> {String(entry[1])}
+                          </span>
+                        ))}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {plainObj && (
+                  <dl style="display:grid;grid-template-columns:max-content 1fr;gap:var(--sp-1) var(--sp-4);margin-top:var(--sp-2);font-size:var(--fs-sm);">
+                    {objectEntries(val).map(entry => (
+                      <Fragment>
+                        <dt class="mono muted">{entry[0]}</dt>
+                        <dd style="color:var(--c-text);">{entry[1] == null ? '—' : String(entry[1])}</dd>
+                      </Fragment>
+                    ))}
+                  </dl>
+                )}
+
+                {evidence.length > 0 && (
+                  <div class="evidence-list" style="margin-top:var(--sp-3);">
+                    {evidence.map(ev => {
+                      const url = evUrl(ev);
+                      return (
+                        <div class="evidence-item">
+                          <div style="display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-2);">
+                            <span class="badge" style="color:var(--c-text);background:var(--c-surface-raise);border-color:var(--c-border);font-size:0.65rem;">
+                              {ev.kind}
+                            </span>
+                            {url ? (
+                              <a
+                                href={url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="mono"
+                                style="font-size:var(--fs-xs);color:var(--c-accent);text-decoration:underline;text-underline-offset:2px;word-break:break-all;"
+                              >
+                                {ev.ref}
+                              </a>
+                            ) : (
+                              <code class="mono" style="font-size:var(--fs-xs);color:var(--c-text-muted);user-select:all;">{ev.ref}</code>
+                            )}
+                            <button class="evidence-toggle">details</button>
+                          </div>
+                          {ev.quote && (
+                            <code style="display:block;white-space:pre-wrap;color:var(--c-text-muted);font-size:var(--fs-xs);line-height:1.5;margin-bottom:var(--sp-1);">
+                              {ev.quote}
+                            </code>
+                          )}
+                          {ev.notes && (
+                            <p class="muted" style="font-size:var(--fs-xs);font-style:italic;">{ev.notes}</p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+  })}
+
+  <script>
+    document.querySelectorAll('.evidence-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.evidence-item');
+        item?.classList.toggle('expanded');
+      });
+    });
+  </script>
+</BaseLayout>
