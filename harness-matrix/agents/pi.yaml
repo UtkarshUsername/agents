@@ -1,0 +1,589 @@
+id:
+  value: pi
+  confidence: high
+  evidence:
+    - kind: code
+      ref: pi-mono/packages/coding-agent/package.json:7
+      quote: '"name": "pi"'
+name:
+  value: Pi Coding Agent
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: pi-mono/packages/coding-agent/README.md:26
+      quote: "Looking for the pi coding agent?"
+repo:
+  url:
+    value: https://github.com/badlogic/pi-mono.git
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/package.json:90
+        quote: '"url": "git+https://github.com/badlogic/pi-mono.git"'
+  default_branch:
+    value: main
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/.git/refs/remotes/origin/HEAD:1
+        quote: "ref: refs/remotes/origin/main"
+  pinned_commit:
+    value: 9e22d3913a0e2c4ab4770c059d1224666a69ca8c
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/.git/refs/heads/main:1
+        quote: "9e22d3913a0e2c4ab4770c059d1224666a69ca8c"
+license:
+  value: MIT
+  confidence: high
+  evidence:
+    - kind: code
+      ref: pi-mono/packages/coding-agent/package.json:87
+      quote: '"license": "MIT"'
+primary_language:
+  value: TypeScript
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: pi-mono/packages/coding-agent/docs/extensions.md:5
+      quote: "Extensions are TypeScript modules"
+    - kind: code
+      ref: pi-mono/packages/coding-agent/package.json:33
+      quote: '"dev": "tsgo -p tsconfig.build.json --watch --preserveWatchOutput"'
+platforms:
+  value: [linux, macos, windows]
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: pi-mono/packages/coding-agent/docs/terminal-setup.md:32
+      quote: "macOS: ~/Library/Application Support/Code/User/keybindings.json"
+    - kind: docs
+      ref: pi-mono/packages/coding-agent/docs/terminal-setup.md:33
+      quote: "Linux: ~/.config/Code/User/keybindings.json"
+    - kind: docs
+      ref: pi-mono/packages/coding-agent/docs/windows.md:1
+      quote: "# Windows Setup"
+
+edit:
+  mechanism:
+    value: str_replace
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:16
+        quote: "const editSchema = Type.Object({"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:62
+        quote: "Edit a file by replacing exact text."
+  anchoring:
+    value: "Anchored by matching oldText in file content: exact match first, then fuzzy-normalized fallback; replacement must be unique."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:129
+        quote: "Find the old text using fuzzy matching (tries exact match first, then fuzzy)"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit-diff.ts:73
+        quote: "Find oldText in content, trying exact match first, then fuzzy match."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:149
+        quote: "Found ${occurrences} occurrences ... The text must be unique."
+  verification:
+    value: "Rejects on missing match, non-unique match, or no-op replacement; applies single replacement and writes full file (no partial merge)."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:132
+        quote: "if (!matchResult.found)"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:149
+        quote: "if (occurrences > 1)"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:175
+        quote: "if (baseContent === newContent)"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:188
+        quote: "await ops.writeFile(absolutePath, finalContent);"
+  retry_loop:
+    value: "No edit-specific auto-retry loop in harness code; edit errors are surfaced to the agent as tool failures."
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:217
+        quote: "if (!aborted) { reject(error); }"
+      - kind: code
+        ref: pi-mono/packages/agent/src/agent-loop.ts:333
+        quote: "} catch (e) {"
+  failure_modes:
+    value:
+      - file_not_found
+      - old_text_not_found
+      - non_unique_old_text
+      - no_effect_change
+      - aborted
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:103
+        quote: "File not found: ${path}"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:138
+        quote: "Could not find the exact text in ${path}."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:155
+        quote: "Found ${occurrences} occurrences of the text"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:181
+        quote: "No changes made to ${path}."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:77
+        quote: "reject(new Error(\"Operation aborted\"));"
+
+tools:
+  available:
+    value: [read, write, edit, bash, grep, find, ls, extension_tools]
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:483
+        quote: "Available built-in tools: `read`, `bash`, `edit`, `write`, `grep`, `find`, `ls`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/extensions.md:10
+        quote: "Custom tools - Register tools the LLM can call via `pi.registerTool()`"
+  schema_style:
+    value: "TypeBox JSON-schema-like parameter objects, validated before tool execution."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/ai/src/types.ts:196
+        quote: "export interface Tool<TParameters extends TSchema = TSchema>"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:16
+        quote: "const editSchema = Type.Object({"
+      - kind: code
+        ref: pi-mono/packages/agent/src/agent-loop.ts:322
+        quote: "const validatedArgs = validateToolArguments(tool, toolCall);"
+  sandbox:
+    value: "No built-in permission popup/approval sandbox; bash runs in configured cwd, and file tools resolve relative-to-cwd or absolute paths."
+    confidence: medium
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:417
+        quote: "No permission popups."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/bash.ts:69
+        quote: "cwd,"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/tools/path-utils.ts:56
+        quote: "if (isAbsolute(expanded)) {"
+
+config:
+  locations:
+    value:
+      - path: ~/.pi/agent/settings.json
+        scope: global
+        precedence: lower
+      - path: .pi/settings.json
+        scope: project
+        precedence: higher
+      - path: ~/.pi/agent (base dir, overridable via env)
+        scope: global
+        precedence: base
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/settings.md:7
+        quote: "`~/.pi/agent/settings.json` | Global (all projects)"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/settings.md:8
+        quote: "`.pi/settings.json` | Project (current directory)"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/settings-manager.ts:95
+        quote: "project/overrides take precedence"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/config.ts:188
+        quote: "const envDir = process.env[ENV_AGENT_DIR];"
+  env_vars:
+    value:
+      - name: PI_CODING_AGENT_DIR
+        meaning: Override agent config directory (default ~/.pi/agent)
+      - name: PI_PACKAGE_DIR
+        meaning: Override package asset directory
+      - name: PI_SKIP_VERSION_CHECK
+        meaning: Skip startup version check
+      - name: PI_CACHE_RETENTION
+        meaning: Configure prompt cache retention policy
+      - name: VISUAL
+        meaning: External editor selection
+      - name: EDITOR
+        meaning: External editor selection fallback
+      - name: Provider API key vars
+        meaning: Provider-specific env vars (e.g., OPENAI_API_KEY, ANTHROPIC_API_KEY, GEMINI_API_KEY)
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:552
+        quote: "`PI_CODING_AGENT_DIR` | Override config directory"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:553
+        quote: "`PI_PACKAGE_DIR` | Override package directory"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:555
+        quote: "`PI_CACHE_RETENTION`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:556
+        quote: "`VISUAL`, `EDITOR`"
+      - kind: code
+        ref: pi-mono/packages/ai/src/env-api-keys.ts:95
+        quote: "const envMap: Record<string, string> = {"
+
+extensions:
+  skills:
+    supported:
+      value: true
+      confidence: high
+      evidence:
+        - kind: docs
+          ref: pi-mono/packages/coding-agent/docs/skills.md:5
+          quote: "Skills are self-contained capability packages"
+    locations:
+      value:
+        - ~/.pi/agent/skills/
+        - .pi/skills/
+        - package skills/ or pi.skills in package.json
+        - settings skills[] paths
+        - --skill <path>
+      confidence: high
+      evidence:
+        - kind: docs
+          ref: pi-mono/packages/coding-agent/docs/skills.md:24
+          quote: "Pi loads skills from:"
+        - kind: docs
+          ref: pi-mono/packages/coding-agent/docs/skills.md:30
+          quote: "CLI: `--skill <path>`"
+    format:
+      value: "Markdown SKILL.md with frontmatter (Agent Skills spec)."
+      confidence: high
+      evidence:
+        - kind: docs
+          ref: pi-mono/packages/coding-agent/docs/skills.md:89
+          quote: "A skill is a directory with a `SKILL.md` file."
+        - kind: docs
+          ref: pi-mono/packages/coding-agent/docs/skills.md:104
+          quote: "### SKILL.md Format"
+  plugins:
+    value: "TypeScript extension API plus pi package ecosystem; extensions can register tools/commands/flags/providers and intercept tool calls/results."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/extensions.md:5
+        quote: "Extensions are TypeScript modules that extend pi's behavior."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/extensions/loader.ts:150
+        quote: "registerTool(tool: ToolDefinition): void"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/packages.md:5
+        quote: "Pi packages bundle extensions, skills, prompt templates, and themes"
+  mcp:
+    value: "No built-in MCP in core harness; MCP integration is expected via extensions."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:413
+        quote: "No MCP."
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:320
+        quote: "MCP server integration"
+
+providers:
+  supported:
+    value:
+      - amazon-bedrock
+      - anthropic
+      - google
+      - google-gemini-cli
+      - google-antigravity
+      - google-vertex
+      - openai
+      - azure-openai-responses
+      - openai-codex
+      - github-copilot
+      - xai
+      - groq
+      - cerebras
+      - openrouter
+      - vercel-ai-gateway
+      - zai
+      - mistral
+      - minimax
+      - minimax-cn
+      - huggingface
+      - opencode
+      - kimi-coding
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/ai/src/types.ts:18
+        quote: "export type KnownProvider ="
+  auth:
+    value: "Supports OAuth login and API keys. Resolution order: --api-key runtime override, auth.json entry, environment variable, then models.json fallback resolver."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/providers.md:16
+        quote: "Use `/login` in interactive mode"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/providers.md:183
+        quote: "1. CLI `--api-key` flag"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/auth-storage.ts:277
+        quote: "Priority:"
+  model_selection:
+    value: "Interactive `/model` command and CLI flags (`--provider`, `--model`); defaults and cycling are configurable in settings."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:85
+        quote: "select any model from that provider via `/model`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:459
+        quote: "`--provider <name>`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:460
+        quote: "`--model <pattern>`"
+
+ux:
+  interface:
+    value: "CLI/TUI interactive interface, plus non-interactive print, JSON stream, RPC, and SDK embeddings."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:29
+        quote: "Pi runs in four modes: interactive, print or JSON, RPC ... and an SDK"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:449
+        quote: "(default) | Interactive mode"
+  streaming:
+    value: "Yes. Assistant/token/tool events stream; JSON mode emits event stream lines."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/json.md:7
+        quote: "Outputs all session events as JSON lines to stdout."
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/sdk.md:31
+        quote: "session.subscribe((event) => {"
+  review_controls:
+    value: "No built-in permission popup approvals in core; confirmation gates can be added by extensions."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:417
+        quote: "No permission popups."
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/extensions.md:67
+        quote: "if (event.toolName === \"bash\" ... )"
+  sessions:
+    value: "Sessions persist as JSONL trees under ~/.pi/agent/sessions (unless --no-session/in-memory mode)."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:202
+        quote: "Sessions are stored as JSONL files with a tree structure."
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:206
+        quote: "Sessions auto-save to `~/.pi/agent/sessions/`"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/session-manager.ts:420
+        quote: "Compute the default session directory"
+
+context:
+  compaction:
+    value: "Auto-compaction summarizes old context when threshold exceeded; manual /compact is also supported; settings control reserve/keep token budgets."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/compaction.md:20
+        quote: "Compaction | Context exceeds threshold, or `/compact`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/compaction.md:31
+        quote: "contextTokens > contextWindow - reserveTokens"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/settings-manager.ts:470
+        quote: "return this.settings.compaction?.reserveTokens ?? 16384;"
+  overflow_handling:
+    value: "On context overflow, pi removes the overflow error message from active context, auto-compacts, then retries the agent run."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1591
+        quote: "if (sameModel ... isContextOverflow(...))"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1598
+        quote: "await this._runAutoCompaction(\"overflow\", true);"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1728
+        quote: "this.agent.continue().catch(() => {});"
+
+reliability:
+  auto_retry:
+    value: "Built-in transient-error retry with exponential backoff; configurable (`retry.enabled`, `maxRetries`, delays) and disable-able."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:2091
+        quote: "Match: overloaded_error, rate limit, 429, 500, 502, 503, 504"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:2127
+        quote: "const delayMs = settings.baseDelayMs * 2 ** (this._retryAttempt - 1);"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/settings.md:77
+        quote: "`retry.enabled` | boolean | `true`"
+  recovery_loops:
+    value: "Two recovery loops: (1) overflow-triggered auto-compaction + continue; (2) transient-error auto-retry loop. Both emit start/end events."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:383
+        quote: "Check auto-retry and auto-compaction after agent completes"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1618
+        quote: "this._emit({ type: \"auto_compaction_start\", reason });"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:2129
+        quote: "type: \"auto_retry_start\""
+
+integration:
+  sdk:
+    value: "Supported TypeScript/Node SDK in @mariozechner/pi-coding-agent (createAgentSession/AgentSession API)."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/sdk.md:3
+        quote: "# SDK"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/sdk.md:19
+        quote: "import { AuthStorage, createAgentSession, ModelRegistry, SessionManager }"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/sdk.md:43
+        quote: "npm install @mariozechner/pi-coding-agent"
+  modes:
+    value: [interactive, print, json_event_stream, rpc, sdk_embedding]
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:29
+        quote: "Pi runs in four modes: interactive, print or JSON, RPC ... and an SDK"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:451
+        quote: "`--mode json` | Output all events as JSON lines"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:452
+        quote: "`--mode rpc` | RPC mode for process integration"
+  protocol:
+    value: "JSON lines protocol over stdio. RPC commands on stdin, responses/events on stdout; JSON mode streams AgentSession events as JSONL."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/rpc.md:21
+        quote: "Commands: JSON objects sent to stdin, one per line"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/rpc.md:23
+        quote: "Events: Agent events streamed to stdout as JSON lines"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/json.md:57
+        quote: "Each line is a JSON object."
+
+customization:
+  system_prompt:
+    value: "System prompt can be replaced by SYSTEM.md (project over global), appended via APPEND_SYSTEM.md, and overridden/appended by CLI flags."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:263
+        quote: "Replace the default system prompt with `.pi/SYSTEM.md` ... `~/.pi/agent/SYSTEM.md`"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/resource-loader.ts:745
+        quote: "const projectPath = join(this.cwd, CONFIG_DIR_NAME, \"SYSTEM.md\")"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:504
+        quote: "`--system-prompt <text>` | Replace default prompt"
+  prompt_templates:
+    value: "Markdown prompt files loaded from global/project/package/settings/CLI paths, invoked as slash commands with argument substitution."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/prompt-templates.md:11
+        quote: "Global: `~/.pi/agent/prompts/*.md`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/prompt-templates.md:19
+        quote: "## Format"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/prompt-templates.ts:66
+        quote: "export function substituteArgs(content: string, args: string[]): string"
+  keybindings:
+    value: "Customizable via JSON at ~/.pi/agent/keybindings.json; user config overrides defaults."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/keybindings.md:3
+        quote: "customized via `~/.pi/agent/keybindings.json`"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/keybindings.md:145
+        quote: "User config overrides defaults."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/keybindings.ts:127
+        quote: "const configPath = join(agentDir, \"keybindings.json\")"
+  themes:
+    value: "Themes are JSON files loaded from built-ins, global/project dirs, packages, settings, or CLI paths; active custom theme hot-reloads."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/themes.md:5
+        quote: "Themes are JSON files"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/themes.md:19
+        quote: "Pi loads themes from:"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/themes.md:119
+        quote: "pi reloads it automatically"
+
+distribution:
+  artifacts:
+    value:
+      - npm package: @mariozechner/pi-coding-agent
+      - CLI bin: pi (dist/cli.js)
+      - optional compiled binary via bun build --compile
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:60
+        quote: "npm install -g @mariozechner/pi-coding-agent"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/package.json:10
+        quote: '"bin": { "pi": "dist/cli.js" }'
+      - kind: code
+        ref: pi-mono/packages/coding-agent/package.json:35
+        quote: '"build:binary": "npm run build && bun build --compile ./dist/cli.js --outfile dist/pi"'
+
+packages:
+  install_locations:
+    value:
+      - global npm install root and ~/.pi/agent/git/<host>/<path>
+      - project-local .pi/npm/node_modules and .pi/git/<host>/<path>
+      - temporary extension installs under tmpdir for one-off -e/--extension
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/packages.md:34
+        quote: "global settings (`~/.pi/agent/settings.json`) ... `-l` ... project settings (`.pi/settings.json`)"
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/packages.md:73
+        quote: "Cloned to `~/.pi/agent/git/<host>/<path>` ... or `.pi/git/<host>/<path>`"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/package-manager.ts:1259
+        quote: "return join(this.cwd, CONFIG_DIR_NAME, \"npm\", \"node_modules\", source.name);"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/package-manager.ts:1271
+        quote: "return join(this.agentDir, \"git\", source.host, source.path);"

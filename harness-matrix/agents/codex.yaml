@@ -1,0 +1,718 @@
+id:
+  value: codex
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: codex/README.md:2
+      quote: "<strong>Codex CLI</strong>"
+name:
+  value: Codex CLI
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: codex/README.md:2
+      quote: "<strong>Codex CLI</strong>"
+repo:
+  url:
+    value: https://github.com/openai/codex.git
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/docs/install.md:19
+        quote: "git clone https://github.com/openai/codex.git"
+  default_branch:
+    value: main
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/.git/HEAD:1
+        quote: "ref: refs/heads/main"
+      - kind: docs
+        ref: codex/docs/contributing.md:33
+        quote: "Create a _topic branch_ from `main`"
+  pinned_commit:
+    value: 85034b189e6cb6f90489b65150a903117b194a94
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/.git/refs/heads/main:1
+        quote: "85034b189e6cb6f90489b65150a903117b194a94"
+license:
+  value: Apache-2.0
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: codex/README.md:59
+      quote: "This repository is licensed under the [Apache-2.0 License](LICENSE)."
+primary_language:
+  value: Rust
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: codex/docs/install.md:52
+      quote: "Codex is written in Rust"
+platforms:
+  value: [linux, macos, windows]
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: codex/docs/install.md:7
+      quote: "macOS 12+, Ubuntu 20.04+/Debian 10+, or Windows 11 via WSL2"
+edit:
+  mechanism:
+    value: apply_patch
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1522
+        quote: "builder.register_handler(\"apply_patch\", apply_patch_handler);"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:270
+        quote: "name: \"apply_patch\""
+  anchoring:
+    value: "Context-anchored diff hunks (`@@` + context/old lines) matched with seek-sequence; mismatch errors if context or expected lines cannot be found."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/tool_apply_patch.lark:15
+        quote: "change_context: (\"@@\" | \"@@ \" /(.+)/) LF"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/lib.rs:386
+        quote: "If a chunk has a `change_context`, we use seek_sequence to find it"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/lib.rs:397
+        quote: "Failed to find context '{}' in {}"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/lib.rs:455
+        quote: "Failed to find expected lines in {}"
+  verification:
+    value: "Reject-on-mismatch: patch input is reparsed/verified before apply; parse/context errors fail the call; no fuzzy merge path."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:103
+        quote: "Re-parse and verify the patch"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:166
+        quote: "apply_patch verification failed"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:174
+        quote: "apply_patch handler received invalid patch input"
+  retry_loop:
+    value: "No automatic apply_patch retry loop in the handler; a single verified parse/apply attempt returns success or error."
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:107
+        quote: "match codex_apply_patch::maybe_parse_apply_patch_verified(&command, &cwd) {"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:166
+        quote: "MaybeApplyPatchVerified::CorrectnessError"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:179
+        quote: "apply_patch handler received non-apply_patch input"
+  failure_modes:
+    value:
+      - mode: implicit_invocation_rejected
+        detail: "Raw patch bodies without explicit apply_patch invocation are rejected."
+      - mode: parse_or_payload_error
+        detail: "Unsupported payload and invalid/non-apply_patch input produce model-visible errors."
+      - mode: context_or_expected_lines_missing
+        detail: "Update hunks fail when context/old lines cannot be located."
+      - mode: io_failures
+        detail: "Read/write/delete failures bubble up as apply errors."
+      - mode: partial_apply_possible
+        detail: "Hunks are applied sequentially with no rollback, so early changes can persist if a later hunk fails."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/invocation.rs:138
+        quote: "CorrectnessError(ApplyPatchError::ImplicitInvocation)"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:98
+        quote: "apply_patch handler received unsupported payload"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/lib.rs:454
+        quote: "Failed to find expected lines in {}"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/lib.rs:347
+        quote: "Failed to read file to update"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/src/lib.rs:278
+        quote: "for hunk in hunks"
+      - kind: code
+        ref: codex/codex-rs/apply-patch/tests/fixtures/scenarios/015_failure_after_partial_success_leaves_changes/patch.txt:1
+        quote: "*** Begin Patch"
+tools:
+  available:
+    value:
+      - exec_command
+      - write_stdin
+      - shell
+      - apply_patch
+      - read_file
+      - list_dir
+      - grep_files
+      - list_mcp_resources
+      - list_mcp_resource_templates
+      - read_mcp_resource
+      - update_plan
+      - request_user_input
+      - js_repl
+      - js_repl_reset
+      - search_tool_bm25
+      - view_image
+      - web_search
+      - spawn_agent
+      - send_input
+      - resume_agent
+      - wait
+      - close_agent
+      - dynamic_tools
+      - mcp_tools
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1458
+        quote: "create_exec_command_tool"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1484
+        quote: "create_list_mcp_resources_tool"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1516
+        quote: "builder.push_spec(create_apply_patch_freeform_tool())"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1539
+        quote: "builder.push_spec_with_parallel_support(create_read_file_tool(), true)"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1564
+        quote: "builder.push_spec(ToolSpec::WebSearch"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1581
+        quote: "builder.push_spec(create_spawn_agent_tool())"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1600
+        quote: "builder.push_spec(ToolSpec::Function(converted_tool))"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1615
+        quote: "builder.register_handler(tool.name.clone(), dynamic_tool_handler.clone())"
+  schema_style:
+    value: "Mixed: JSON-schema function tools, freeform grammar tools (Lark), native web_search tool type, plus MCP-to-tool conversion and dynamic tools."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:279
+        quote: "ToolSpec::Function(ResponsesApiTool"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/handlers/apply_patch.rs:269
+        quote: "ToolSpec::Freeform(FreeformTool"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1564
+        quote: "ToolSpec::WebSearch"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1598
+        quote: "match mcp_tool_to_openai_tool"
+  sandbox:
+    value: "Command execution is sandbox-policy driven (none/macOS seatbelt/Linux seccomp/Windows restricted token) with approval gating and execpolicy allow/prompt/forbid decisions."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/sandboxing/mod.rs:161
+        quote: "match sandbox"
+      - kind: code
+        ref: codex/codex-rs/core/src/sandboxing/mod.rs:181
+        quote: "SandboxType::LinuxSeccomp"
+      - kind: code
+        ref: codex/codex-rs/core/src/sandboxing/mod.rs:204
+        quote: "SandboxType::WindowsRestrictedToken"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/sandboxing.rs:160
+        quote: "default_exec_approval_requirement"
+      - kind: code
+        ref: codex/codex-rs/core/src/exec_policy.rs:192
+        quote: "Decision::Forbidden"
+config:
+  locations:
+    value:
+      - "admin managed preferences (macOS)"
+      - "system `/etc/codex/config.toml` (Unix) or `%ProgramData%\\OpenAI\\Codex\\config.toml` (Windows)"
+      - "user `${CODEX_HOME}/config.toml`"
+      - "cwd `${PWD}/config.toml` (trust-gated)"
+      - "tree parent `./.codex/config.toml` (trust-gated)"
+      - "repo `$(git rev-parse --show-toplevel)/.codex/config.toml` (trust-gated)"
+      - "runtime overrides (`--config`, UI model selector)"
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/config_loader/mod.rs:83
+        quote: "Configuration is built up from multiple layers in the following order"
+      - kind: code
+        ref: codex/codex-rs/core/src/config_loader/mod.rs:88
+        quote: "user `${CODEX_HOME}/config.toml`"
+      - kind: code
+        ref: codex/codex-rs/core/src/config_loader/mod.rs:90
+        quote: "tree      parent directories up to root looking for `./.codex/config.toml`"
+      - kind: code
+        ref: codex/codex-rs/core/src/config_loader/mod.rs:92
+        quote: "runtime   e.g., --config flags"
+  env_vars:
+    value:
+      - name: CODEX_HOME
+        meaning: "Overrides Codex state/config home directory (default `~/.codex`)."
+      - name: RUST_LOG
+        meaning: "Controls Codex logging verbosity."
+      - name: OPENAI_BASE_URL
+        meaning: "Overrides default OpenAI provider base URL."
+      - name: OPENAI_ORGANIZATION
+        meaning: "Supplies OpenAI-Organization request header."
+      - name: OPENAI_PROJECT
+        meaning: "Supplies OpenAI-Project request header."
+      - name: CODEX_OSS_PORT
+        meaning: "Sets default local OSS provider port used to build base URL."
+      - name: CODEX_OSS_BASE_URL
+        meaning: "Directly overrides local OSS provider base URL."
+      - name: CODEX_JS_REPL_NODE_PATH
+        meaning: "Highest-precedence Node runtime path for js_repl."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:1987
+        quote: "specified by the `CODEX_HOME` environment variable"
+      - kind: docs
+        ref: codex/docs/install.md:52
+        quote: "honors the `RUST_LOG` environment variable"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:222
+        quote: "exporting `OPENAI_BASE_URL`"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:243
+        quote: "`OPENAI_ORGANIZATION`"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:245
+        quote: "`OPENAI_PROJECT`"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:299
+        quote: "std::env::var(\"CODEX_OSS_PORT\")"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:306
+        quote: "std::env::var(\"CODEX_OSS_BASE_URL\")"
+      - kind: docs
+        ref: codex/docs/js_repl.md:30
+        quote: "`CODEX_JS_REPL_NODE_PATH` environment variable"
+extensions:
+  skills:
+    supported:
+      value: true
+      confidence: high
+      evidence:
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/mod.rs:16
+          quote: "pub use loader::load_skills"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:93
+          quote: "const SKILLS_FILENAME: &str = \"SKILL.md\";"
+    locations:
+      value:
+        - "project config folders: `<layer-config-folder>/skills`"
+        - "deprecated user location: `$CODEX_HOME/skills`"
+        - "user-installed: `$HOME/.agents/skills`"
+        - "embedded system cache: `$CODEX_HOME/skills/.system`"
+        - "repo-local: directories between project root and cwd at `./.agents/skills`"
+      confidence: high
+      evidence:
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:198
+          quote: "path: config_folder.as_path().join(SKILLS_DIR_NAME)"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:203
+          quote: "Deprecated user skills location (`$CODEX_HOME/skills`)"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:210
+          quote: "`$HOME/.agents/skills` (user-installed skills)."
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:218
+          quote: "`$CODEX_HOME/skills/.system`"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:276
+          quote: "let agents_skills = dir.join(AGENTS_DIR_NAME).join(SKILLS_DIR_NAME);"
+    format:
+      value: "Skill body in `SKILL.md` with required YAML frontmatter; optional metadata in `.agents/agents/openai.yaml`."
+      confidence: high
+      evidence:
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:93
+          quote: "const SKILLS_FILENAME: &str = \"SKILL.md\";"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:95
+          quote: "const SKILLS_METADATA_DIR: &str = \"agents\";"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:96
+          quote: "const SKILLS_METADATA_FILENAME: &str = \"openai.yaml\";"
+        - kind: code
+          ref: codex/codex-rs/core/src/skills/loader.rs:126
+          quote: "missing YAML frontmatter delimited by ---"
+  plugins:
+    value: "Dynamic tool injection plus app connector tools; no separate package registry was found in this scan."
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1610
+        quote: "if !dynamic_tools.is_empty()"
+      - kind: code
+        ref: codex/codex-rs/core/src/tools/spec.rs:1510
+        quote: "builder.register_handler(\"search_tool_bm25\", search_tool_handler)"
+      - kind: docs
+        ref: codex/docs/config.md:17
+        quote: "Use `$` in the composer to insert a ChatGPT connector"
+  mcp:
+    value: "Supports MCP client integration (configured servers/tools/resources) and an experimental MCP server mode (`codex mcp-server`)."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/codex-rs/README.md:33
+        quote: "Codex CLI functions as an MCP client"
+      - kind: docs
+        ref: codex/codex-rs/README.md:37
+        quote: "Codex can be launched as an MCP _server_ by running `codex mcp-server`"
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:96
+        quote: "Manage external MCP servers for Codex"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/types.rs:232
+        quote: "pub enum McpServerTransportConfig"
+providers:
+  supported:
+    value:
+      - openai
+      - ollama
+      - lmstudio
+      - user_defined_via_model_providers
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:270
+        quote: "Built-in default provider list."
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:279
+        quote: "(\"openai\", P::create_openai_provider())"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:281
+        quote: "OLLAMA_OSS_PROVIDER_ID"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:285
+        quote: "LMSTUDIO_OSS_PROVIDER_ID"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:5
+        quote: "User-defined entries inside `~/.codex/config.toml` under the `model_providers` key"
+  auth:
+    value: "Provider auth supports OpenAI login/auth token flow (`requires_openai_auth`) and environment-based API keys via `env_key`/`api_key()` lookup."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:104
+        quote: "Does this provider require an OpenAI API Key or ChatGPT login token?"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:65
+        quote: "Environment variable that stores the user's API key"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:180
+        quote: "pub fn api_key(&self)"
+  model_selection:
+    value: "Model/provider can be selected by CLI flags (`--model`, `--oss`, `--local-provider`) and config (`model_provider`, profile, fallback default `openai`)."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/exec/src/cli.rs:26
+        quote: "#[arg(long, short = 'm', global = true)]"
+      - kind: code
+        ref: codex/codex-rs/exec/src/cli.rs:30
+        quote: "#[arg(long = \"oss\", default_value_t = false)]"
+      - kind: code
+        ref: codex/codex-rs/exec/src/cli.rs:35
+        quote: "#[arg(long = \"local-provider\")]"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:1562
+        quote: "let model_provider_id = model_provider"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:1565
+        quote: "unwrap_or_else(|| \"openai\".to_string())"
+ux:
+  interface:
+    value: "CLI multitool with interactive TUI default and non-interactive `exec` mode."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:54
+        quote: "If no subcommand is specified, options will be forwarded to the interactive CLI."
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:83
+        quote: "Run Codex non-interactively."
+      - kind: docs
+        ref: codex/codex-rs/README.md:53
+        quote: "To run Codex non-interactively, run `codex exec PROMPT`"
+  streaming:
+    value: "Yes. Streaming is exposed in app-server event notifications and SDK `runStreamed()` event generator."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:547
+        quote: "The app-server streams JSON-RPC notifications while a turn is running."
+      - kind: docs
+        ref: codex/sdk/typescript/README.md:36
+        quote: "use `runStreamed()` instead, which returns an async generator"
+  review_controls:
+    value: "Approval controls include `--ask-for-approval` policies, sandbox policy selection, and a dangerous bypass mode; runtime execpolicy can allow/prompt/forbid commands."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/tui/src/cli.rs:75
+        quote: "Configure when the model requires human approval"
+      - kind: code
+        ref: codex/codex-rs/tui/src/cli.rs:70
+        quote: "Select the sandbox policy"
+      - kind: code
+        ref: codex/codex-rs/tui/src/cli.rs:83
+        quote: "Skip all confirmation prompts and execute commands without sandboxing"
+      - kind: code
+        ref: codex/codex-rs/core/src/exec_policy.rs:191
+        quote: "match evaluation.decision"
+  sessions:
+    value: "Session rollouts persist as JSONL under `$CODEX_HOME/sessions` with archived sessions and append-only `session_index.jsonl`; `--ephemeral` disables persistence."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/rollout/recorder.rs:63
+        quote: "Rollouts are recorded as JSONL"
+      - kind: code
+        ref: codex/codex-rs/core/src/rollout/mod.rs:5
+        quote: "pub const SESSIONS_SUBDIR: &str = \"sessions\";"
+      - kind: code
+        ref: codex/codex-rs/core/src/rollout/mod.rs:6
+        quote: "pub const ARCHIVED_SESSIONS_SUBDIR: &str = \"archived_sessions\";"
+      - kind: code
+        ref: codex/codex-rs/core/src/rollout/session_index.rs:16
+        quote: "const SESSION_INDEX_FILE: &str = \"session_index.jsonl\";"
+      - kind: code
+        ref: codex/codex-rs/exec/src/cli.rs:74
+        quote: "Run without persisting session files to disk."
+context:
+  compaction:
+    value: "Auto-compaction is token-threshold driven (`model_auto_compact_token_limit`), run pre-sampling and mid-turn; implementation chooses inline local or remote compaction task."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:164
+        quote: "Token usage threshold triggering auto-compaction"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4426
+        quote: "let token_limit_reached = total_usage_tokens >= auto_compact_limit"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4520
+        quote: "if total_usage_tokens >= auto_compact_limit"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4565
+        quote: "async fn run_auto_compact"
+  overflow_handling:
+    value: "On normal sampling overflow, the turn errors with `ContextWindowExceeded`; during compaction, overflow triggers trimming oldest history items and retrying until fit or terminal failure."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4791
+        quote: "Err(CodexErr::ContextWindowExceeded)"
+      - kind: code
+        ref: codex/codex-rs/core/src/compact.rs:168
+        quote: "Err(e @ CodexErr::ContextWindowExceeded)"
+      - kind: code
+        ref: codex/codex-rs/core/src/compact.rs:174
+        quote: "history.remove_first_item();"
+      - kind: code
+        ref: codex/codex-rs/core/src/compact.rs:177
+        quote: "continue;"
+reliability:
+  auto_retry:
+    value: "Automatic retries exist for retryable stream failures (with backoff and provider-configured retry budget) and HTTP transport failures (5xx/network/timeout) via request retry policy."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4805
+        quote: "if !err.is_retryable() { return Err(err); }"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4810
+        quote: "let max_retries = turn_context.provider.stream_max_retries();"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4827
+        quote: "requested_delay.unwrap_or_else(|| backoff(retries))"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:159
+        quote: "max_attempts: self.request_max_retries()"
+      - kind: code
+        ref: codex/codex-rs/core/src/model_provider_info.rs:163
+        quote: "retry_5xx: true"
+      - kind: code
+        ref: codex/codex-rs/codex-client/src/retry.rs:32
+        quote: "TransportError::Timeout | TransportError::Network(_) => self.retry_transport"
+  recovery_loops:
+    value: "Recovery loops include stream transport fallback (WebSocket->HTTPS), invalid-image sanitization+continue, and compaction retry-by-trimming when compact prompts overflow context."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4813
+        quote: "try_switch_fallback_transport"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4818
+        quote: "Falling back from WebSockets to HTTPS transport"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4479
+        quote: "if state.history.replace_last_turn_images(\"Invalid image\") { continue; }"
+      - kind: code
+        ref: codex/codex-rs/core/src/compact.rs:170
+        quote: "Trim from the beginning to preserve cache (prefix-based) and keep recent messages intact."
+integration:
+  sdk:
+    value: "Supported TypeScript SDK package: `@openai/codex-sdk` wrapping the CLI."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/sdk/typescript/README.md:5
+        quote: "The TypeScript SDK wraps the `codex` CLI"
+      - kind: docs
+        ref: codex/sdk/typescript/README.md:10
+        quote: "npm install @openai/codex-sdk"
+  modes:
+    value:
+      - interactive_tui_default
+      - non_interactive_exec
+      - jsonl_event_output_mode
+      - mcp_server_mode
+      - app_server_mode
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:54
+        quote: "If no subcommand is specified, options will be forwarded to the interactive CLI."
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:83
+        quote: "Run Codex non-interactively."
+      - kind: code
+        ref: codex/codex-rs/exec/src/cli.rs:89
+        quote: "Print events to stdout as JSONL."
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:99
+        quote: "Start Codex as an MCP server (stdio)."
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:102
+        quote: "Run the app server"
+  protocol:
+    value: "Exec JSON mode uses JSONL event framing; app-server uses bidirectional JSON-RPC 2.0 over stdio JSONL or websocket text frames."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/exec/src/lib.rs:3
+        quote: "In --json mode, stdout must be valid JSONL, one event per line."
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:22
+        quote: "supports bidirectional communication using JSON-RPC 2.0 messages"
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:26
+        quote: "stdio (`--listen stdio://`, default): newline-delimited JSON (JSONL)"
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:27
+        quote: "websocket (`--listen ws://IP:PORT`): one JSON-RPC message per websocket text frame"
+customization:
+  system_prompt:
+    value: "System/developer instructions are customizable via config (`instructions`, `developer_instructions`, `model_instructions_file`), global AGENTS files under CODEX_HOME, and project AGENTS hierarchy (root->cwd)."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:901
+        quote: "/// System instructions."
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:904
+        quote: "Developer instructions"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:908
+        quote: "model instructions file"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:1427
+        quote: "let user_instructions = Self::load_instructions(Some(&codex_home));"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:1886
+        quote: "for candidate in [LOCAL_PROJECT_DOC_FILENAME, DEFAULT_PROJECT_DOC_FILENAME]"
+      - kind: code
+        ref: codex/codex-rs/core/src/project_doc.rs:11
+        quote: "Collect every `AGENTS.md` found from the repository root down to the current working directory"
+  prompt_templates:
+    value: "Built-in instruction templates are Markdown files embedded via `include_str!`; user custom prompts load from `$CODEX_HOME/prompts` as `.md` files with optional frontmatter keys (`description`, `argument-hint`)."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/protocol/src/models.rs:198
+        quote: "include_str!(\"prompts/base_instructions/default.md\")"
+      - kind: code
+        ref: codex/codex-rs/protocol/src/models.rs:223
+        quote: "include_str!(\"prompts/permissions/approval_policy/never.md\")"
+      - kind: code
+        ref: codex/codex-rs/core/src/custom_prompts.rs:7
+        quote: "default prompts directory: `$CODEX_HOME/prompts`"
+      - kind: code
+        ref: codex/codex-rs/core/src/custom_prompts.rs:42
+        quote: "Only include Markdown files with a .md extension"
+      - kind: code
+        ref: codex/codex-rs/core/src/custom_prompts.rs:80
+        quote: "- `description`: short description shown in the slash popup"
+  keybindings:
+    value: "No keybinding config file/setting location was found; shortcuts appear implemented in TUI code."
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/tui/src/bottom_pane/footer.rs:681
+        quote: "fn shortcut_overlay_lines(state: ShortcutsState)"
+      - kind: code
+        ref: codex/codex-rs/tui/src/bottom_pane/footer.rs:694
+        quote: "for descriptor in SHORTCUTS"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:249
+        quote: "tui.alternate_screen"
+  themes:
+    value: "No explicit theme configuration file/setting was found in this scan; TUI color handling references terminal palette behavior."
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/tui/src/terminal_palette.rs:159
+        quote: "The first 16 colors vary based on terminal theme"
+      - kind: code
+        ref: codex/codex-rs/core/src/config/mod.rs:238
+        quote: "Enable ASCII animations and shimmer effects in the TUI."
+distribution:
+  artifacts:
+    value:
+      - npm_global_package: "@openai/codex"
+      - homebrew_cask: "codex"
+      - platform_specific_release_binaries
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/README.md:20
+        quote: "npm install -g @openai/codex"
+      - kind: docs
+        ref: codex/README.md:25
+        quote: "brew install --cask codex"
+      - kind: docs
+        ref: codex/README.md:31
+        quote: "download the appropriate binary for your platform"
+packages:
+  install_locations:
+    value:
+      - global_npm_install
+      - global_homebrew_cask_install
+    confidence: medium
+    evidence:
+      - kind: docs
+        ref: codex/README.md:16
+        quote: "Install globally with your preferred package manager"
+      - kind: docs
+        ref: codex/README.md:20
+        quote: "npm install -g @openai/codex"
+      - kind: docs
+        ref: codex/README.md:25
+        quote: "brew install --cask codex"

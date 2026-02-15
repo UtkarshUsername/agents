@@ -1,0 +1,709 @@
+id:
+  value: opencode
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: opencode/README.md:10
+      quote: "The open source AI coding agent."
+name:
+  value: OpenCode
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: opencode/README.md:6
+      quote: "<img ... alt=\"OpenCode logo\">"
+repo:
+  url:
+    value: https://github.com/anomalyco/opencode.git
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/.git/config:7
+        quote: "url = https://github.com/anomalyco/opencode.git"
+  default_branch:
+    value: dev
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/AGENTS.md:3
+        quote: "The default branch in this repo is `dev`."
+      - kind: code
+        ref: opencode/.git/HEAD:1
+        quote: "ref: refs/heads/dev"
+  pinned_commit:
+    value: eb553f53ac9689ab2056fceea0c7b0504f642101
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/.git/refs/heads/dev:1
+        quote: "eb553f53ac9689ab2056fceea0c7b0504f642101"
+license:
+  value: MIT
+  confidence: high
+  evidence:
+    - kind: code
+      ref: opencode/package.json:89
+      quote: '"license": "MIT"'
+primary_language:
+  value: TypeScript
+  confidence: medium
+  evidence:
+    - kind: code
+      ref: opencode/packages/opencode/package.json:9
+      quote: '"typecheck": "tsgo --noEmit"'
+    - kind: code
+      ref: opencode/packages/opencode/package.json:26
+      quote: '"./*": "./src/*.ts"'
+platforms:
+  value: [linux, macos, windows]
+  confidence: high
+  evidence:
+    - kind: docs
+      ref: opencode/README.md:50
+      quote: "scoop install opencode             # Windows"
+    - kind: docs
+      ref: opencode/README.md:52
+      quote: "brew install anomalyco/tap/opencode # macOS and Linux"
+    - kind: docs
+      ref: opencode/README.md:54
+      quote: "sudo pacman -S opencode            # Arch Linux"
+edit:
+  mechanism:
+    value: [apply_patch, str_replace, rewrite_file]
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:105
+        quote: "EditTool,"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:106
+        quote: "WriteTool,"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:114
+        quote: "ApplyPatchTool,"
+  anchoring:
+    value: "`apply_patch` anchors updates using `@@` sections plus context/old-line sequence matching; `edit` falls back through block/context/whitespace/indentation matchers."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/patch/index.ts:113
+        quote: "if (lines[i].startsWith(\"@@\"))"
+      - kind: code
+        ref: opencode/packages/opencode/src/patch/index.ts:357
+        quote: "const contextIdx = seekSequence(originalLines, [chunk.change_context], lineIndex)"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/edit.ts:625
+        quote: "for (const replacer of [SimpleReplacer, ... ContextAwareReplacer, MultiOccurrenceReplacer])"
+  verification:
+    value: "Reject-on-mismatch. Patch input is parsed and verified before writes; edit fails when oldString is missing or non-unique."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/apply_patch.ts:35
+        quote: "throw new Error(`apply_patch verification failed: ${error}`)"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/apply_patch.ts:43
+        quote: "throw new Error(\"apply_patch verification failed: no hunks found\")"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/edit.ts:650
+        quote: "Could not find oldString in the file"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/edit.ts:654
+        quote: "Found multiple matches for oldString"
+  retry_loop:
+    value: "No external auto-retry loop for failed edits; each call is single-shot. `edit` performs internal matcher fallbacks before failing."
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/edit.ts:625
+        quote: "for (const replacer of [...])"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/apply_patch.ts:24
+        quote: "async execute(params, ctx)"
+  failure_modes:
+    value:
+      - mode: patch_parse_or_empty
+        detail: "Invalid patch envelope or empty patch is rejected."
+      - mode: patch_target_missing
+        detail: "Update fails if target file cannot be read."
+      - mode: patch_context_mismatch
+        detail: "Update fails when expected context/old lines are not found."
+      - mode: edit_old_string_not_found
+        detail: "Exact/fallback search cannot find target text."
+      - mode: edit_ambiguous_match
+        detail: "Multiple matches without replaceAll are rejected."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/apply_patch.ts:41
+        quote: "throw new Error(\"patch rejected: empty patch\")"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/apply_patch.ts:96
+        quote: "Failed to read file to update"
+      - kind: code
+        ref: opencode/packages/opencode/src/patch/index.ts:392
+        quote: "Failed to find expected lines"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/edit.ts:651
+        quote: "Could not find oldString in the file"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/edit.ts:654
+        quote: "Found multiple matches for oldString"
+tools:
+  available:
+    value:
+      - bash
+      - read
+      - list
+      - glob
+      - grep
+      - edit
+      - write
+      - apply_patch
+      - task
+      - skill
+      - todowrite
+      - webfetch
+      - websearch
+      - codesearch
+      - question
+      - lsp (experimental)
+      - custom tools from config dirs/plugins
+      - MCP tools
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:99
+        quote: "InvalidTool, ... BashTool, ReadTool, GlobTool, GrepTool, EditTool, WriteTool"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:107
+        quote: "TaskTool, WebFetchTool, TodoWriteTool, WebSearchTool, CodeSearchTool, SkillTool, ApplyPatchTool"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:36
+        quote: "const glob = new Bun.Glob(\"{tool,tools}/*.{js,ts}\")"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/prompt.ts:815
+        quote: "for (const [key, item] of Object.entries(await MCP.tools()))"
+  schema_style:
+    value: "Zod-defined parameters converted to JSON Schema for AI SDK function tools; MCP tools converted from MCP JSON schema; one freeform-style patch payload field (`patchText`)."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/session/prompt.ts:781
+        quote: "z.toJSONSchema(item.parameters)"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/prompt.ts:785
+        quote: "inputSchema: jsonSchema(schema as any)"
+      - kind: code
+        ref: opencode/packages/opencode/src/mcp/index.ts:131
+        quote: "return dynamicTool({ ... inputSchema: jsonSchema(schema)"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/apply_patch.ts:18
+        quote: "patchText: z.string()"
+  sandbox:
+    value: "No hard OS sandbox is implemented in tool runner. Boundaries are permission rules (`allow`/`ask`/`deny`) plus explicit `external_directory` checks; shell runs via local spawn."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/permissions.mdx:16
+        quote: '"allow" — run without approval'
+      - kind: code
+        ref: opencode/packages/opencode/src/permission/next.ts:242
+        quote: "return match ?? { action: \"ask\", permission, pattern: \"*\" }"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/external-directory.ts:24
+        quote: 'permission: "external_directory"'
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/bash.ts:167
+        quote: "const proc = spawn(params.command, { shell, cwd, env ... })"
+config:
+  locations:
+    value:
+      - "remote org config: <provider>/.well-known/opencode"
+      - "global config: ~/.config/opencode/opencode.json|jsonc"
+      - "custom config file: $OPENCODE_CONFIG"
+      - "project config: opencode.json|jsonc (searches upward)"
+      - ".opencode directories (agents/commands/plugins/etc.)"
+      - "custom config dir: $OPENCODE_CONFIG_DIR"
+      - "inline config: $OPENCODE_CONFIG_CONTENT"
+      - "enterprise managed config: /etc/opencode (Linux), /Library/Application Support/opencode (macOS), %ProgramData%\\opencode (Windows)"
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/config.mdx:45
+        quote: "1. Remote config ... 6. Inline config"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:71
+        quote: "Config loading order (low -> high precedence)"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:105
+        quote: "if (Flag.OPENCODE_CONFIG)"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:113
+        quote: "Filesystem.findUp(file, Instance.directory, Instance.worktree)"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:147
+        quote: "if (Flag.OPENCODE_CONFIG_DIR)"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:180
+        quote: "if (Flag.OPENCODE_CONFIG_CONTENT)"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:46
+        quote: "return \"/Library/Application Support/opencode\""
+  env_vars:
+    value:
+      - name: OPENCODE_CONFIG
+        meaning: "Path to custom config file loaded between global and project configs."
+      - name: OPENCODE_CONFIG_DIR
+        meaning: "Additional config directory scanned for agents/commands/modes/plugins."
+      - name: OPENCODE_CONFIG_CONTENT
+        meaning: "Inline JSON config override with highest non-managed precedence."
+      - name: OPENCODE_PERMISSION
+        meaning: "JSON override merged into permission rules."
+      - name: OPENCODE_DISABLE_PROJECT_CONFIG
+        meaning: "Disable project config discovery/scanning."
+      - name: OPENCODE_DISABLE_AUTOCOMPACT
+        meaning: "Forces `compaction.auto=false`."
+      - name: OPENCODE_DISABLE_PRUNE
+        meaning: "Forces `compaction.prune=false`."
+      - name: OPENCODE_ENABLE_EXA
+        meaning: "Enables Exa-backed `websearch`/`codesearch` outside OpenCode provider."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/config.mdx:120
+        quote: "Specify a custom config file path using the OPENCODE_CONFIG environment variable."
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/config.mdx:133
+        quote: "Specify a custom config directory using the OPENCODE_CONFIG_DIR"
+      - kind: code
+        ref: opencode/packages/opencode/src/flag/flag.ts:11
+        quote: "export const OPENCODE_CONFIG_CONTENT = process.env[\"OPENCODE_CONFIG_CONTENT\"]"
+      - kind: code
+        ref: opencode/packages/opencode/src/flag/flag.ts:15
+        quote: "export const OPENCODE_PERMISSION = process.env[\"OPENCODE_PERMISSION\"]"
+      - kind: code
+        ref: opencode/packages/opencode/src/flag/flag.ts:68
+        quote: "Object.defineProperty(Flag, \"OPENCODE_DISABLE_PROJECT_CONFIG\""
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:233
+        quote: "if (Flag.OPENCODE_DISABLE_AUTOCOMPACT)"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:236
+        quote: "if (Flag.OPENCODE_DISABLE_PRUNE)"
+      - kind: code
+        ref: opencode/packages/opencode/src/flag/flag.ts:44
+        quote: "export const OPENCODE_ENABLE_EXA = truthy(\"OPENCODE_ENABLE_EXA\")"
+extensions:
+  skills:
+    supported:
+      value: true
+      confidence: high
+      evidence:
+        - kind: docs
+          ref: opencode/packages/web/src/content/docs/skills.mdx:7
+          quote: "Skills are loaded on-demand via the native `skill` tool"
+        - kind: code
+          ref: opencode/packages/opencode/src/tool/registry.ts:113
+          quote: "SkillTool,"
+    locations:
+      value:
+        - .opencode/skills/<name>/SKILL.md
+        - ~/.config/opencode/skills/<name>/SKILL.md
+        - .claude/skills/<name>/SKILL.md
+        - ~/.claude/skills/<name>/SKILL.md
+        - .agents/skills/<name>/SKILL.md
+        - ~/.agents/skills/<name>/SKILL.md
+        - additional configured paths (`skills.paths`)
+        - remote URL indexes (`skills.urls`)
+      confidence: high
+      evidence:
+        - kind: docs
+          ref: opencode/packages/web/src/content/docs/skills.mdx:16
+          quote: "Project config: `.opencode/skills/<name>/SKILL.md`"
+        - kind: docs
+          ref: opencode/packages/web/src/content/docs/skills.mdx:20
+          quote: "Project agent-compatible: `.agents/skills/<name>/SKILL.md`"
+        - kind: code
+          ref: opencode/packages/opencode/src/skill/skill.ts:136
+          quote: "for (const skillPath of config.skills?.paths ?? [])"
+        - kind: code
+          ref: opencode/packages/opencode/src/skill/skill.ts:156
+          quote: "for (const url of config.skills?.urls ?? [])"
+    format:
+      value: "Markdown `SKILL.md` with YAML frontmatter (`name`, `description` required)."
+      confidence: high
+      evidence:
+        - kind: docs
+          ref: opencode/packages/web/src/content/docs/skills.mdx:36
+          quote: "Each `SKILL.md` must start with YAML frontmatter."
+        - kind: docs
+          ref: opencode/packages/web/src/content/docs/skills.mdx:39
+          quote: "`name` (required)"
+  plugins:
+    value: "Supported. Loads local TS/JS plugin files and npm plugins, auto-installs dependencies with Bun, and exposes hook/event APIs plus plugin-defined tools."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/plugins.mdx:22
+        quote: "`.opencode/plugins/` - Project-level plugins"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/plugins.mdx:31
+        quote: "Specify npm packages in your config file."
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/plugins.mdx:48
+        quote: "npm plugins are installed automatically using Bun at startup"
+      - kind: code
+        ref: opencode/packages/opencode/src/plugin/index.ts:101
+        quote: "export async function trigger<...>(name: Name, input: Input, output: Output)"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:52
+        quote: "for (const [id, def] of Object.entries(plugin.tool ?? {}))"
+  mcp:
+    value: "Supported MCP client for local+remote servers, OAuth flows, dynamic MCP tool registration, and MCP prompts/resources consumption."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/mcp-servers.mdx:6
+        quote: "OpenCode supports both local and remote servers."
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/mcp-servers.mdx:168
+        quote: "OpenCode automatically handles OAuth authentication for remote MCP servers."
+      - kind: code
+        ref: opencode/packages/opencode/src/mcp/index.ts:566
+        quote: "export async function tools()"
+      - kind: code
+        ref: opencode/packages/opencode/src/mcp/index.ts:608
+        quote: "export async function prompts()"
+      - kind: code
+        ref: opencode/packages/opencode/src/mcp/index.ts:629
+        quote: "export async function resources()"
+providers:
+  supported:
+    value:
+      - models.dev provider catalog (75+ providers)
+      - opencode
+      - anthropic
+      - openai
+      - amazon-bedrock
+      - azure
+      - google
+      - google-vertex
+      - google-vertex-anthropic
+      - openrouter
+      - xai
+      - mistral
+      - groq
+      - deepinfra
+      - cerebras
+      - cohere
+      - gateway
+      - togetherai
+      - perplexity
+      - vercel
+      - gitlab
+      - github-copilot
+      - github-copilot-enterprise
+    confidence: medium
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/providers.mdx:9
+        quote: "support 75+ LLM providers"
+      - kind: code
+        ref: opencode/packages/opencode/src/provider/provider.ts:60
+        quote: "const BUNDLED_PROVIDERS: Record<string, (options: any) => SDK> = {"
+      - kind: code
+        ref: opencode/packages/opencode/src/provider/provider.ts:92
+        quote: "const CUSTOM_LOADERS: Record<string, CustomLoader> = {"
+  auth:
+    value: "Supports API keys, OAuth tokens, and well-known tokens; credentials are stored in `~/.local/share/opencode/auth.json`; `/connect` and `opencode auth` workflows are documented."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/providers.mdx:20
+        quote: "stored in `~/.local/share/opencode/auth.json`."
+      - kind: code
+        ref: opencode/packages/opencode/src/auth/index.ts:34
+        quote: "export const Info = z.discriminatedUnion(\"type\", [Oauth, Api, WellKnown])"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/cli.mdx:110
+        quote: "### auth"
+  model_selection:
+    value: "Model can be selected by CLI flag (`--model`), config (`model`/`small_model`), and interactive `/models`; default selection falls back to recent-model state then provider defaults."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:248
+        quote: "option(\"model\", { ... describe: \"model to use in the format of provider/model\" })"
+      - kind: code
+        ref: opencode/packages/opencode/src/provider/provider.ts:1231
+        quote: "if (cfg.model) return parseModel(cfg.model)"
+      - kind: code
+        ref: opencode/packages/opencode/src/provider/provider.ts:1235
+        quote: "path.join(Global.Path.state, \"model.json\")"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/tui.mdx:166
+        quote: "### models"
+ux:
+  interface:
+    value: "CLI with interactive TUI by default, non-interactive run mode, and optional headless server."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/cli.mdx:8
+        quote: "The OpenCode CLI by default starts the TUI"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/cli.mdx:17
+        quote: "opencode run \"Explain how closures work in JavaScript\""
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/server.mdx:9
+        quote: "`opencode serve` command runs a headless HTTP server"
+  streaming:
+    value: "Yes. `opencode run --format json` streams structured events; server exposes SSE event streams."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:261
+        quote: '"format: default (formatted) or json (raw JSON events)"'
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:431
+        quote: "process.stdout.write(JSON.stringify({ type, timestamp: Date.now(), sessionID, ...data })"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/server.mdx:95
+        quote: "`GET`  | `/global/event`  | Get global events (SSE stream)"
+  review_controls:
+    value: "Permission system supports `allow`/`ask`/`deny` with prompt-time approvals (`once`, `always`, `reject`) and per-agent overrides."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/permissions.mdx:16
+        quote: '"allow" — run without approval'
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/permissions.mdx:176
+        quote: "`once` — approve just this request"
+      - kind: code
+        ref: opencode/packages/opencode/src/permission/next.ts:89
+        quote: "export const Reply = z.enum([\"once\", \"always\", \"reject\"])"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/permissions.mdx:186
+        quote: "Agent permissions are merged with the global config"
+  sessions:
+    value: "Session/message state is persisted in SQLite at `~/.local/share/opencode/opencode.db`; CLI supports continue/session/fork flows."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/storage/db.ts:28
+        quote: 'export const Path = path.join(Global.Path.data, "opencode.db")'
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/cli.mdx:34
+        quote: "`--continue` | `-c`  | Continue the last session"
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:240
+        quote: 'option("fork", { describe: "fork the session before continuing" })'
+context:
+  compaction:
+    value: "Automatic compaction is token-threshold based (`reserved` buffer) and configurable (`compaction.auto`, `compaction.prune`, `compaction.reserved`); compaction can auto-insert a synthetic continue message."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/session/compaction.ts:34
+        quote: "if (config.compaction?.auto === false) return false"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/compaction.ts:43
+        quote: "const reserved = config.compaction?.reserved"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/config.mdx:499
+        quote: "`auto` - Automatically compact the session when context is full"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/compaction.ts:202
+        quote: "if (result === \"continue\" && input.auto)"
+  overflow_handling:
+    value: "When near context limit, session loop enqueues compaction and continues; context-overflow errors are treated as non-retryable."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/session/prompt.ts:535
+        quote: "// context overflow, needs compaction"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/prompt.ts:541
+        quote: "await SessionCompaction.create({ ... auto: true })"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/retry.ts:62
+        quote: "context overflow errors should not be retried"
+reliability:
+  auto_retry:
+    value: "Automatic retry is enabled for retryable provider/API failures with exponential backoff and `Retry-After` header support; no explicit user-facing disable switch was found in scanned docs/code."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:359
+        quote: "const retry = SessionRetry.retryable(error)"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:369
+        quote: "await SessionRetry.sleep(delay, input.abort)"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/retry.ts:31
+        quote: "const retryAfterMs = headers[\"retry-after-ms\"]"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/retry.ts:58
+        quote: "RETRY_INITIAL_DELAY * Math.pow(RETRY_BACKOFF_FACTOR, attempt - 1)"
+  recovery_loops:
+    value: "Includes a doom-loop guard (same tool call repeated 3 times) that requests permission, plus auto-compaction loop handoff (`process` returns `compact`)."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:20
+        quote: "const DOOM_LOOP_THRESHOLD = 3"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:165
+        quote: "await PermissionNext.ask({ permission: \"doom_loop\""
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:412
+        quote: "if (needsCompaction) return \"compact\""
+integration:
+  sdk:
+    value: "Supported JS/TS SDK package `@opencode-ai/sdk` (createOpencode server+client or createOpencodeClient to attach)."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/sdk.mdx:21
+        quote: "npm install @opencode-ai/sdk"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/sdk.mdx:31
+        quote: "import { createOpencode } from \"@opencode-ai/sdk\""
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/sdk.mdx:75
+        quote: "import { createOpencodeClient } from \"@opencode-ai/sdk\""
+  modes:
+    value: "Interactive TUI, non-interactive `run`, headless HTTP `serve`, and ACP subprocess mode."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/cli.mdx:8
+        quote: "CLI by default starts the TUI"
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:216
+        quote: 'command: "run [message..]"'
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/server.mdx:9
+        quote: "`opencode serve` command runs a headless HTTP server"
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/acp.ts:13
+        quote: 'command: "acp"'
+  protocol:
+    value: "HTTP/OpenAPI server APIs with SSE event streams; ACP uses JSON-RPC over stdio with NDJSON framing."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/server.mdx:50
+        quote: "server exposes an OpenAPI 3.1 spec endpoint"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/server.mdx:95
+        quote: "Get global events (SSE stream)"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/acp.mdx:20
+        quote: "communicates with your editor over JSON-RPC via stdio"
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/acp.ts:55
+        quote: "const stream = ndJsonStream(input, output)"
+customization:
+  system_prompt:
+    value: "System instructions come from agent prompt + built-in model prompt, project/global `AGENTS.md` (with `CLAUDE.md` compatibility), and `instructions` files/URLs in config."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/rules.mdx:6
+        quote: "provide custom instructions ... by creating an `AGENTS.md` file"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/rules.mdx:91
+        quote: "Local files ... (`AGENTS.md`, `CLAUDE.md`)"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/instruction.ts:94
+        quote: "if (config.instructions)"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/llm.ts:72
+        quote: "...(input.agent.prompt ? [input.agent.prompt]"
+  prompt_templates:
+    value: "Prompt templates are defined as custom commands: JSON `command.<name>.template` or Markdown files in `commands/**/*.md` with frontmatter + body template."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/commands.mdx:33
+        quote: "The frontmatter defines command properties. The content becomes the template."
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:656
+        quote: "export const Command = z.object({ template: z.string()"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:342
+        quote: "const COMMAND_GLOB = new Bun.Glob(\"{command,commands}/**/*.md\")"
+  keybindings:
+    value: "Configurable via `opencode.json` `keybinds` object (string key chords, `none` to disable)."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/keybinds.mdx:6
+        quote: "you can customize through the OpenCode config"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/keybinds.mdx:120
+        quote: "disable a keybind ... value of \"none\""
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:1010
+        quote: 'keybinds: Keybinds.optional().describe("Custom keybind configurations")'
+  themes:
+    value: "Theme selection via config (`theme`) with built-ins and JSON custom themes loaded from user/project `.opencode/themes` directories."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/themes.mdx:83
+        quote: "Themes are loaded from multiple directories"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/themes.mdx:86
+        quote: "`~/.config/opencode/themes/*.json`"
+      - kind: docs
+        ref: opencode/packages/web/src/content/docs/themes.mdx:87
+        quote: "`<project-root>/.opencode/themes/*.json`"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:1009
+        quote: 'theme: z.string().optional().describe("Theme name to use for the interface")'
+distribution:
+  artifacts:
+    value:
+      - install script (`curl ... | bash`)
+      - npm global package (`opencode-ai`)
+      - Homebrew formula
+      - Scoop and Chocolatey packages
+      - Arch Linux and AUR packages
+      - Nix package
+      - desktop binaries on GitHub releases
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/README.md:46
+        quote: "curl -fsSL https://opencode.ai/install | bash"
+      - kind: docs
+        ref: opencode/README.md:49
+        quote: "npm i -g opencode-ai@latest"
+      - kind: docs
+        ref: opencode/README.md:52
+        quote: "brew install anomalyco/tap/opencode"
+      - kind: docs
+        ref: opencode/README.md:65
+        quote: "Download directly from the releases page"
+packages:
+  install_locations:
+    value:
+      - "$OPENCODE_INSTALL_DIR"
+      - "$XDG_BIN_DIR"
+      - "$HOME/bin"
+      - "$HOME/.opencode/bin"
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: opencode/README.md:83
+        quote: "The install script respects the following priority order"
+      - kind: docs
+        ref: opencode/README.md:85
+        quote: "1. `$OPENCODE_INSTALL_DIR`"
+      - kind: docs
+        ref: opencode/README.md:88
+        quote: "4. `$HOME/.opencode/bin`"
