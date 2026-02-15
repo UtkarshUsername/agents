@@ -47,15 +47,18 @@ Each claim must carry at least one evidence item:
 ### Edit Mechanism
 
 - `edit.mechanism`:
-  - `apply_patch` (diff-like blob)
-  - `str_replace` (exact replace)
-  - `rewrite_file` (full rewrite)
-  - `anchored` (hashline/ID anchored edits)
-  - `custom` (describe)
+  - Value should be a list of mechanisms supported by the harness, even if only one.
+  - Mechanism enums:
+    - `apply_patch` (diff-like blob)
+    - `str_replace` (exact replace)
+    - `rewrite_file` (full rewrite)
+    - `anchored` (hashline/ID anchored edits)
+    - `custom` (describe)
+- `edit.mechanism_default` (optional): default mechanism used in the default “coding” mode if multiple are supported.
 - `edit.anchoring` (free text + evidence)
 - `edit.verification` (reject/merge/partial apply)
 - `edit.retry_loop` (auto-retry? how?)
-- `edit.failure_modes[]` (each with evidence)
+- `edit.failure_modes[]`: list of objects `{ mode, detail? }` (each with evidence)
 
 ### Tools
 
@@ -117,6 +120,15 @@ This captures “how do I make it behave the way I want”.
 
 - `distribution.artifacts` (npm, standalone binary, bun compile, etc.)
 - `packages.install_locations` (global vs project-local install dirs, if it has a package system)
+
+### Extra Fields (V1, optional)
+
+Collectors often discover useful picker-relevant capabilities that don't yet have canonical fields.
+Store these in an `extras` map so they can still be surfaced in the UI and later promoted.
+
+- `extras.<dotted_field_name>`: `{ value, confidence, evidence[] }`
+  - Example keys: `tools.model_conditional_exposure`, `config.variable_substitution`
+  - Keep `value` concise and picker-oriented.
 
 ## Minimal YAML Shape (Collector Output)
 
