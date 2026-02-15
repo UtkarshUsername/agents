@@ -60,7 +60,7 @@ platforms:
       quote: "macOS 12+, Ubuntu 20.04+/Debian 10+, or Windows 11 via WSL2"
 edit:
   mechanism:
-    value: apply_patch
+    value: [apply_patch]
     confidence: high
     evidence:
       - kind: code
@@ -716,3 +716,47 @@ packages:
       - kind: docs
         ref: codex/README.md:25
         quote: "brew install --cask codex"
+extras:
+  integration.app_server_protocol_versioning:
+    value: "Harness pickers embedding Codex need to know transport/message compatibility and generation workflow."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:39
+        quote: "Each output is specific to the version of Codex you used to run the command"
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:42
+        quote: "codex app-server generate-ts --out DIR"
+      - kind: code
+        ref: codex/codex-rs/cli/src/main.rs:339
+        quote: "/// [experimental] Generate TypeScript bindings for the app server protocol."
+  reliability.transport_fallbacks:
+    value: "Automatic fallback from WebSocket streaming to HTTPS can reduce outage impact in unstable networks."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4813
+        quote: ".try_switch_fallback_transport(&turn_context.otel_manager, &turn_context.model_info)"
+      - kind: code
+        ref: codex/codex-rs/core/src/codex.rs:4818
+        quote: "message: format!(\"Falling back from WebSockets to HTTPS transport. {err:#}\"),"
+  skills.system_skill_cache:
+    value: "System-skill cache location/install behavior affects reproducibility and policy controls in managed environments."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: codex/codex-rs/core/src/skills/system.rs:22
+        quote: "/// This is typically located at `CODEX_HOME/skills/.system`."
+      - kind: code
+        ref: codex/codex-rs/core/src/skills/system.rs:40
+        quote: "/// Installs embedded system skills into `CODEX_HOME/skills/.system`."
+  ux.event_opt_out_controls:
+    value: "Clients integrating event streams may need fine-grained event suppression for performance/noise control."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:526
+        quote: "Clients can suppress specific notifications per connection by sending exact method names"
+      - kind: docs
+        ref: codex/codex-rs/app-server/README.md:530
+        quote: "Applies to both legacy (`codex/event/*`) and v2 (`thread/*`, `turn/*`, `item/*`, etc.) notifications."

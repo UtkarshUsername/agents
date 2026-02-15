@@ -11,7 +11,7 @@ name:
   evidence:
     - kind: docs
       ref: opencode/README.md:6
-      quote: "<img ... alt=\"OpenCode logo\">"
+      quote: "<img src=\"packages/console/app/src/asset/logo-ornate-light.svg\" alt=\"OpenCode logo\">"
 repo:
   url:
     value: https://github.com/anomalyco/opencode.git
@@ -81,6 +81,16 @@ edit:
       - kind: code
         ref: opencode/packages/opencode/src/tool/registry.ts:114
         quote: "ApplyPatchTool,"
+  mechanism_default:
+    value: apply_patch
+    confidence: medium
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:145
+        quote: "if (t.id === \"apply_patch\") return usePatch"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:146
+        quote: "if (t.id === \"edit\" || t.id === \"write\") return !usePatch"
   anchoring:
     value: "`apply_patch` anchors updates using `@@` sections plus context/old-line sequence matching; `edit` falls back through block/context/whitespace/indentation matchers."
     confidence: high
@@ -93,7 +103,7 @@ edit:
         quote: "const contextIdx = seekSequence(originalLines, [chunk.change_context], lineIndex)"
       - kind: code
         ref: opencode/packages/opencode/src/tool/edit.ts:625
-        quote: "for (const replacer of [SimpleReplacer, ... ContextAwareReplacer, MultiOccurrenceReplacer])"
+        quote: "for (const replacer of ["
   verification:
     value: "Reject-on-mismatch. Patch input is parsed and verified before writes; edit fails when oldString is missing or non-unique."
     confidence: high
@@ -116,7 +126,7 @@ edit:
     evidence:
       - kind: code
         ref: opencode/packages/opencode/src/tool/edit.ts:625
-        quote: "for (const replacer of [...])"
+        quote: "for (const replacer of ["
       - kind: code
         ref: opencode/packages/opencode/src/tool/apply_patch.ts:24
         quote: "async execute(params, ctx)"
@@ -174,7 +184,7 @@ tools:
     evidence:
       - kind: code
         ref: opencode/packages/opencode/src/tool/registry.ts:99
-        quote: "InvalidTool, ... BashTool, ReadTool, GlobTool, GrepTool, EditTool, WriteTool"
+        quote: "InvalidTool,"
       - kind: code
         ref: opencode/packages/opencode/src/tool/registry.ts:107
         quote: "TaskTool, WebFetchTool, TodoWriteTool, WebSearchTool, CodeSearchTool, SkillTool, ApplyPatchTool"
@@ -196,7 +206,7 @@ tools:
         quote: "inputSchema: jsonSchema(schema as any)"
       - kind: code
         ref: opencode/packages/opencode/src/mcp/index.ts:131
-        quote: "return dynamicTool({ ... inputSchema: jsonSchema(schema)"
+        quote: "return dynamicTool({"
       - kind: code
         ref: opencode/packages/opencode/src/tool/apply_patch.ts:18
         quote: "patchText: z.string()"
@@ -215,7 +225,7 @@ tools:
         quote: 'permission: "external_directory"'
       - kind: code
         ref: opencode/packages/opencode/src/tool/bash.ts:167
-        quote: "const proc = spawn(params.command, { shell, cwd, env ... })"
+        quote: "const proc = spawn(params.command, {"
 config:
   locations:
     value:
@@ -231,7 +241,7 @@ config:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/config.mdx:45
-        quote: "1. Remote config ... 6. Inline config"
+        quote: "1. **Remote config** (from `.well-known/opencode`) - organizational defaults"
       - kind: code
         ref: opencode/packages/opencode/src/config/config.ts:71
         quote: "Config loading order (low -> high precedence)"
@@ -355,7 +365,7 @@ extensions:
         quote: "npm plugins are installed automatically using Bun at startup"
       - kind: code
         ref: opencode/packages/opencode/src/plugin/index.ts:101
-        quote: "export async function trigger<...>(name: Name, input: Input, output: Output)"
+        quote: "export async function trigger<"
       - kind: code
         ref: opencode/packages/opencode/src/tool/registry.ts:52
         quote: "for (const [id, def] of Object.entries(plugin.tool ?? {}))"
@@ -433,8 +443,8 @@ providers:
     confidence: high
     evidence:
       - kind: code
-        ref: opencode/packages/opencode/src/cli/cmd/run.ts:248
-        quote: "option(\"model\", { ... describe: \"model to use in the format of provider/model\" })"
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:251
+        quote: "describe: \"model to use in the format of provider/model\","
       - kind: code
         ref: opencode/packages/opencode/src/provider/provider.ts:1231
         quote: "if (cfg.model) return parseModel(cfg.model)"
@@ -466,8 +476,8 @@ ux:
         ref: opencode/packages/opencode/src/cli/cmd/run.ts:261
         quote: '"format: default (formatted) or json (raw JSON events)"'
       - kind: code
-        ref: opencode/packages/opencode/src/cli/cmd/run.ts:431
-        quote: "process.stdout.write(JSON.stringify({ type, timestamp: Date.now(), sessionID, ...data })"
+        ref: opencode/packages/opencode/src/cli/cmd/run.ts:430
+        quote: "if (args.format === \"json\") {"
       - kind: docs
         ref: opencode/packages/web/src/content/docs/server.mdx:95
         quote: "`GET`  | `/global/event`  | Get global events (SSE stream)"
@@ -526,7 +536,7 @@ context:
         quote: "// context overflow, needs compaction"
       - kind: code
         ref: opencode/packages/opencode/src/session/prompt.ts:541
-        quote: "await SessionCompaction.create({ ... auto: true })"
+        quote: "await SessionCompaction.create({"
       - kind: code
         ref: opencode/packages/opencode/src/session/retry.ts:62
         quote: "context overflow errors should not be retried"
@@ -613,16 +623,16 @@ customization:
     evidence:
       - kind: docs
         ref: opencode/packages/web/src/content/docs/rules.mdx:6
-        quote: "provide custom instructions ... by creating an `AGENTS.md` file"
+        quote: "You can provide custom instructions to opencode by creating an `AGENTS.md` file."
       - kind: docs
         ref: opencode/packages/web/src/content/docs/rules.mdx:91
-        quote: "Local files ... (`AGENTS.md`, `CLAUDE.md`)"
+        quote: "1. **Local files** by traversing up from the current directory (`AGENTS.md`, `CLAUDE.md`)"
       - kind: code
         ref: opencode/packages/opencode/src/session/instruction.ts:94
         quote: "if (config.instructions)"
       - kind: code
-        ref: opencode/packages/opencode/src/session/llm.ts:72
-        quote: "...(input.agent.prompt ? [input.agent.prompt]"
+        ref: opencode/packages/opencode/src/session/llm.ts:70
+        quote: "// use agent prompt otherwise provider prompt"
   prompt_templates:
     value: "Prompt templates are defined as custom commands: JSON `command.<name>.template` or Markdown files in `commands/**/*.md` with frontmatter + body template."
     confidence: high
@@ -645,7 +655,7 @@ customization:
         quote: "you can customize through the OpenCode config"
       - kind: docs
         ref: opencode/packages/web/src/content/docs/keybinds.mdx:120
-        quote: "disable a keybind ... value of \"none\""
+        quote: "You can disable a keybind by adding the key to your config with a value of \"none\"."
       - kind: code
         ref: opencode/packages/opencode/src/config/config.ts:1010
         quote: 'keybinds: Keybinds.optional().describe("Custom keybind configurations")'
@@ -707,3 +717,47 @@ packages:
       - kind: docs
         ref: opencode/README.md:88
         quote: "4. `$HOME/.opencode/bin`"
+extras:
+  tools.model_conditional_exposure:
+    value: "tool strategy changes by model family, which can affect patch/edit reliability and prompt behavior."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:144
+        quote: "model.modelID.includes(\"gpt-\") && !model.modelID.includes(\"oss\") && !model.modelID.includes(\"gpt-4\")"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:145
+        quote: "if (t.id === \"apply_patch\") return usePatch"
+      - kind: code
+        ref: opencode/packages/opencode/src/tool/registry.ts:146
+        quote: "if (t.id === \"edit\" || t.id === \"write\") return !usePatch"
+  integration.local_rpc_mode:
+    value: "TUI can run without local HTTP by using worker RPC, useful for embedding and reduced network surface."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/tui/thread.ts:156
+        quote: "// Use direct RPC communication (no HTTP)"
+      - kind: code
+        ref: opencode/packages/opencode/src/cli/cmd/tui/thread.ts:20
+        quote: "function createWorkerFetch(client: RpcClient): typeof fetch {"
+  reliability.loop_guard_doom_loop:
+    value: "explicit repeated-tool-call guard can prevent runaway loops and cost blowups."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:20
+        quote: "const DOOM_LOOP_THRESHOLD = 3"
+      - kind: code
+        ref: opencode/packages/opencode/src/session/processor.ts:165
+        quote: "await PermissionNext.ask({"
+  config.variable_substitution:
+    value: "{env:...} and {file:...} substitution materially changes portability and secret handling."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:1246
+        quote: "text = text.replace(/\\{env:([^}]+)\\}/g, (_, varName) => {"
+      - kind: code
+        ref: opencode/packages/opencode/src/config/config.ts:1250
+        quote: "const fileMatches = text.match(/\\{file:[^}]+\\}/g)"

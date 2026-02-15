@@ -67,7 +67,7 @@ platforms:
 
 edit:
   mechanism:
-    value: str_replace
+    value: [str_replace]
     confidence: high
     evidence:
       - kind: code
@@ -88,7 +88,7 @@ edit:
         quote: "Find oldText in content, trying exact match first, then fuzzy match."
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/tools/edit.ts:149
-        quote: "Found ${occurrences} occurrences ... The text must be unique."
+        quote: "if (occurrences > 1) {"
   verification:
     value: "Rejects on missing match, non-unique match, or no-op replacement; applies single replacement and writes full file (no partial merge)."
     confidence: high
@@ -117,11 +117,11 @@ edit:
         quote: "} catch (e) {"
   failure_modes:
     value:
-      - file_not_found
-      - old_text_not_found
-      - non_unique_old_text
-      - no_effect_change
-      - aborted
+      - mode: file_not_found
+      - mode: old_text_not_found
+      - mode: non_unique_old_text
+      - mode: no_effect_change
+      - mode: aborted
     confidence: high
     evidence:
       - kind: code
@@ -360,7 +360,7 @@ ux:
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:29
-        quote: "Pi runs in four modes: interactive, print or JSON, RPC ... and an SDK"
+        quote: "Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps."
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:449
         quote: "(default) | Interactive mode"
@@ -383,7 +383,7 @@ ux:
         quote: "No permission popups."
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/extensions.md:67
-        quote: "if (event.toolName === \"bash\" ... )"
+        quote: "pi.on(\"tool_call\", async (event, ctx) => {"
   sessions:
     value: "Sessions persist as JSONL trees under ~/.pi/agent/sessions (unless --no-session/in-memory mode)."
     confidence: high
@@ -418,7 +418,7 @@ context:
     evidence:
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1591
-        quote: "if (sameModel ... isContextOverflow(...))"
+        quote: "if (sameModel && !errorIsFromBeforeCompaction && isContextOverflow(assistantMessage, contextWindow)) {"
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:1598
         quote: "await this._runAutoCompaction(\"overflow\", true);"
@@ -474,7 +474,7 @@ integration:
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:29
-        quote: "Pi runs in four modes: interactive, print or JSON, RPC ... and an SDK"
+        quote: "Pi runs in four modes: interactive, print or JSON, RPC for process integration, and an SDK for embedding in your own apps."
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:451
         quote: "`--mode json` | Output all events as JSON lines"
@@ -502,7 +502,7 @@ customization:
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/README.md:263
-        quote: "Replace the default system prompt with `.pi/SYSTEM.md` ... `~/.pi/agent/SYSTEM.md`"
+        quote: "Replace the default system prompt with `.pi/SYSTEM.md` (project) or `~/.pi/agent/SYSTEM.md` (global)."
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/resource-loader.ts:745
         quote: "const projectPath = join(this.cwd, CONFIG_DIR_NAME, \"SYSTEM.md\")"
@@ -552,7 +552,7 @@ customization:
 distribution:
   artifacts:
     value:
-      - npm package: @mariozechner/pi-coding-agent
+      - "npm package: @mariozechner/pi-coding-agent"
       - CLI bin: pi (dist/cli.js)
       - optional compiled binary via bun build --compile
     confidence: high
@@ -577,13 +577,53 @@ packages:
     evidence:
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/packages.md:34
-        quote: "global settings (`~/.pi/agent/settings.json`) ... `-l` ... project settings (`.pi/settings.json`)"
+        quote: "Use `-l` to write to project settings (`.pi/settings.json`) instead."
       - kind: docs
         ref: pi-mono/packages/coding-agent/docs/packages.md:73
-        quote: "Cloned to `~/.pi/agent/git/<host>/<path>` ... or `.pi/git/<host>/<path>`"
+        quote: "- Cloned to `~/.pi/agent/git/<host>/<path>` (global) or `.pi/git/<host>/<path>` (project)."
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/package-manager.ts:1259
         quote: "return join(this.cwd, CONFIG_DIR_NAME, \"npm\", \"node_modules\", source.name);"
       - kind: code
         ref: pi-mono/packages/coding-agent/src/core/package-manager.ts:1271
         quote: "return join(this.agentDir, \"git\", source.host, source.path);"
+extras:
+  messaging.queue_controls:
+    value: "Pi has explicit steering vs follow-up queue semantics and modes."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/README.md:191
+        quote: "- **Enter** queues a *steering* message, delivered after current tool execution (interrupts remaining tools)"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:916
+        quote: "async steer(text: string, images?: ImageContent[]): Promise<void> {"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/agent-session.ts:936
+        quote: "async followUp(text: string, images?: ImageContent[]): Promise<void> {"
+  extensions.ui_bridge_modes:
+    value: "RPC mode maps extension UI calls into protocol messages; some UI capabilities are unavailable in RPC."
+    confidence: high
+    evidence:
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/modes/rpc/rpc-mode.ts:118
+        quote: "* Create an extension UI context that uses the RPC protocol."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/modes/rpc/rpc-mode.ts:164
+        quote: "// Working message not supported in RPC mode - requires TUI loader access"
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/modes/rpc/rpc-mode.ts:201
+        quote: "// Custom UI not supported in RPC mode"
+  packages.filtering_controls:
+    value: "Pi supports include/exclude and exact force include/exclude patterns (`!`, `+`, `-`) for package resources."
+    confidence: high
+    evidence:
+      - kind: docs
+        ref: pi-mono/packages/coding-agent/docs/packages.md:190
+        quote: "`+path` and `-path` are exact paths relative to the package root."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/package-manager.ts:537
+        quote: "* Apply patterns to paths and return a Set of enabled paths."
+      - kind: code
+        ref: pi-mono/packages/coding-agent/src/core/package-manager.ts:544
+        quote: "function applyPatterns(allPaths: string[], patterns: string[], baseDir: string): Set<string> {"
