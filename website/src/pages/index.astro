@@ -104,15 +104,15 @@ function cellText(field: any): string {
 }
 ---
 
-<BaseLayout title="Agents" description="Under-the-hood comparison matrix of agent harness behavior, architecture, and reliability.">
+<BaseLayout title="" description="Side-by-side comparison of AI coding agent harnesses — architecture, capabilities, and reliability at a glance.">
   <section id="matrix">
     <div class="section-header fade-in-up stagger-1">
-      <h2>Under-The-Hood Matrix</h2>
+      <h2>Agent Harness Comparison</h2>
     </div>
 
     <p class="matrix-note muted">
-      Rows are capability/behavior fields. Columns are harnesses. For full evidence and raw citations,
-      open a harness detail page from the column header.
+      A side-by-side breakdown of how each agent harness is built, what it can do, and where it falls short.
+      Click any harness column to see full evidence and citations.
     </p>
 
     <!-- Confidence legend -->
@@ -230,10 +230,29 @@ function cellText(field: any): string {
               activeKey = sec.id;
             }
           }
+          let activePill: Element | null = null;
           document.querySelectorAll('.section-jump__pill').forEach((pill) => {
             const href = pill.getAttribute('href');
-            pill.classList.toggle('active', href === `#${activeKey}`);
+            const isActive = href === `#${activeKey}`;
+            pill.classList.toggle('active', isActive);
+            if (isActive) activePill = pill;
           });
+
+          // Scroll the jump nav so the active pill is visible
+          if (activePill && jumpNav) {
+            const nav = jumpNav as HTMLElement;
+            const pill = activePill as HTMLElement;
+            const pillLeft = pill.offsetLeft;
+            const pillRight = pillLeft + pill.offsetWidth;
+            const navScroll = nav.scrollLeft;
+            const navWidth = nav.clientWidth;
+
+            if (pillLeft < navScroll + 120) {
+              nav.scrollTo({ left: Math.max(0, pillLeft - 120), behavior: 'smooth' });
+            } else if (pillRight > navScroll + navWidth - 40) {
+              nav.scrollTo({ left: pillRight - navWidth + 40, behavior: 'smooth' });
+            }
+          }
 
           ticking = false;
         });
