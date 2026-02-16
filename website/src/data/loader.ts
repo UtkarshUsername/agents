@@ -150,14 +150,6 @@ export function makeFieldAnchor(sectionKey: string, fieldKey: string): string {
   return `field-${anchorSlug(sectionKey)}-${anchorSlug(fieldKey)}`;
 }
 
-export function loadContributing(): string {
-  const filePath = path.resolve(
-    import.meta.dirname,
-    '../../../harness-matrix/CONTRIBUTING.md',
-  );
-  return fs.readFileSync(filePath, 'utf-8');
-}
-
 export function loadDecisionGuide(): string {
   const filePath = path.resolve(
     import.meta.dirname,
