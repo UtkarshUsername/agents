@@ -115,6 +115,16 @@ function cellText(field: any): string {
       open a harness detail page from the column header.
     </p>
 
+    <!-- Confidence legend -->
+    <div class="confidence-legend fade-in-up stagger-2">
+      <span class="confidence-legend__label">Confidence levels</span>
+      <span class="badge badge--high">high</span> Confirmed in source
+      <span class="confidence-legend__sep">·</span>
+      <span class="badge badge--medium">medium</span> Inferred from patterns
+      <span class="confidence-legend__sep">·</span>
+      <span class="badge badge--low">low</span> Best guess
+    </div>
+
     <!-- Section Jump Nav -->
     <nav class="section-jump fade-in-up stagger-2" aria-label="Jump to section">
       <span class="section-jump__label">Sections</span>
@@ -195,6 +205,13 @@ function cellText(field: any): string {
   </button>
 
   <script>
+    // Measure nav height and set CSS variable for sticky thead offset
+    const navEl = document.querySelector('nav');
+    if (navEl) {
+      const h = navEl.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--nav-h', `${h}px`);
+    }
+
     const btn = document.getElementById('backToTop');
     const jumpNav = document.querySelector('.section-jump');
     let ticking = false;
@@ -239,7 +256,6 @@ function cellText(field: any): string {
   }
 
   .matrix-home-wrap {
-    overflow-x: auto;
     border: 1px solid var(--c-border);
     border-radius: var(--r-lg);
     background: linear-gradient(
@@ -265,7 +281,7 @@ function cellText(field: any): string {
 
   .matrix-home-table thead th {
     position: sticky;
-    top: 0;
+    top: var(--nav-h, 2.8rem);
     z-index: 4;
     background: var(--c-surface-raise);
     border-bottom: 1px solid var(--c-border);
@@ -383,11 +399,12 @@ function cellText(field: any): string {
     display: flex;
     align-items: center;
     gap: var(--sp-3);
-    padding: var(--sp-4) 0;
+    padding: var(--sp-3) 0;
     margin-bottom: var(--sp-4);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
+    border-bottom: 1px solid var(--c-border);
   }
 
   .section-jump::-webkit-scrollbar {
@@ -499,5 +516,34 @@ function cellText(field: any): string {
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+  }
+
+  /* --- Confidence Legend --- */
+  .confidence-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    padding: var(--sp-3) var(--sp-4);
+    margin-bottom: var(--sp-4);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-subtle);
+    border-radius: var(--r-md);
+  }
+
+  .confidence-legend__label {
+    font-weight: 600;
+    color: var(--c-text-heading);
+    margin-right: var(--sp-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .confidence-legend__sep {
+    color: var(--c-border);
+    margin: 0 var(--sp-1);
   }
 </style>

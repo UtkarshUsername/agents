@@ -100,6 +100,16 @@ function evUrl(ev: Evidence): string | null {
     </div>
   </header>
 
+  <!-- Confidence legend -->
+  <div class="confidence-legend fade-in">
+    <span class="confidence-legend__label">Confidence levels</span>
+    <span class="badge badge--high">high</span> Confirmed in source
+    <span class="confidence-legend__sep">·</span>
+    <span class="badge badge--medium">medium</span> Inferred from patterns
+    <span class="confidence-legend__sep">·</span>
+    <span class="badge badge--low">low</span> Best guess
+  </div>
+
   <!-- Sections -->
   {sections.map((section, si) => {
     const stagger = Math.min(si + 1, 4);
@@ -221,3 +231,33 @@ function evUrl(ev: Evidence): string | null {
     });
   </script>
 </BaseLayout>
+
+<style>
+  .confidence-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    padding: var(--sp-3) var(--sp-4);
+    margin-bottom: var(--sp-8);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border-subtle);
+    border-radius: var(--r-md);
+  }
+
+  .confidence-legend__label {
+    font-weight: 600;
+    color: var(--c-text-heading);
+    margin-right: var(--sp-2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .confidence-legend__sep {
+    color: var(--c-border);
+    margin: 0 var(--sp-1);
+  }
+</style>

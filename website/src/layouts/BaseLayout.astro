@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { loadAllHarnesses, getFieldSafe } from '../data/loader.ts';
 
 interface Props {
   title: string;
@@ -7,6 +8,12 @@ interface Props {
 }
 
 const { title, description = 'Source-backed comparison of AI coding agent harnesses.' } = Astro.props;
+
+const harnesses = loadAllHarnesses().map((h) => {
+  const id = String(getFieldSafe(h, 'id').value ?? '');
+  const name = String(getFieldSafe(h, 'name').value ?? id);
+  return { id, name };
+});
 ---
 
 <!doctype html>
@@ -30,8 +37,11 @@ const { title, description = 'Source-backed comparison of AI coding agent harnes
         <a href="/" style="font-family:var(--font-mono);font-size:var(--fs-md);font-weight:700;color:var(--c-text-heading);letter-spacing:-0.02em;">
           <span style="color:var(--c-accent);">▪</span> Harness Matrix
         </a>
-        <div style="display:flex;gap:var(--sp-6);">
+        <div style="display:flex;align-items:center;gap:var(--sp-6);">
           <a href="/">Matrix</a>
+          {harnesses.map((h) => (
+            <a href={`/h/${h.id}`}>{h.name}</a>
+          ))}
           <a href="/contribute">Contribute</a>
         </div>
       </div>

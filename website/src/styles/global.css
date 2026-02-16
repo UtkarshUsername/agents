@@ -81,6 +81,7 @@ body {
   line-height: var(--lh);
   color: var(--c-text);
   background: var(--c-bg);
+  overflow-x: auto;
 }
 
 h1, h2, h3, h4, h5 {
