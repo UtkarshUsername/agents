@@ -1,166 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadAllHarnesses, getFieldSafe, getFieldValue } from '../data/loader.ts';
-
-const harnesses = loadAllHarnesses();
-
-function truncate(str: any, max: number): string {
-  const s = String(str ?? '');
-  return s.length > max ? s.slice(0, max) + '…' : s;
-}
-
-function safeArray(val: any): any[] {
-  return Array.isArray(val) ? val : [];
-}
-
-function yesNo(val: boolean): string {
-  return val ? 'Yes' : 'No';
-}
 ---
 
-<BaseLayout title="Compare Harnesses">
-  <div class="section-header">
-    <h2>Compare Harnesses</h2>
-  </div>
-
-  <div class="filter-bar">
-    <span class="mono muted" style="font-size:var(--fs-xs);margin-right:var(--sp-2);">OS</span>
-    <div class="filter-group">
-      <button class="filter-btn" data-filter="os" data-value="linux">linux</button>
-      <button class="filter-btn" data-filter="os" data-value="macos">macos</button>
-      <button class="filter-btn" data-filter="os" data-value="windows">windows</button>
-    </div>
-
-    <span class="mono muted" style="font-size:var(--fs-xs);margin-left:var(--sp-4);margin-right:var(--sp-2);">Edit</span>
-    <div class="filter-group">
-      <button class="filter-btn" data-filter="edit" data-value="apply_patch">apply_patch</button>
-      <button class="filter-btn" data-filter="edit" data-value="str_replace">str_replace</button>
-      <button class="filter-btn" data-filter="edit" data-value="rewrite_file">rewrite_file</button>
-    </div>
-
-    <span class="mono muted" style="font-size:var(--fs-xs);margin-left:var(--sp-4);margin-right:var(--sp-2);">MCP</span>
-    <div class="filter-group">
-      <button class="filter-btn" data-filter="mcp" data-value="yes">yes</button>
-      <button class="filter-btn" data-filter="mcp" data-value="no">no</button>
-    </div>
-
-    <span class="mono muted" style="font-size:var(--fs-xs);margin-left:var(--sp-4);margin-right:var(--sp-2);">Sandbox</span>
-    <div class="filter-group">
-      <button class="filter-btn" data-filter="sandbox" data-value="yes">yes</button>
-      <button class="filter-btn" data-filter="sandbox" data-value="no">no</button>
-    </div>
-  </div>
-
-  <div class="matrix-table-wrap">
-    <table class="matrix-table">
-      <thead>
-        <tr>
-          <th>Harness</th>
-          <th>Edit Mechanism</th>
-          <th>Default Edit</th>
-          <th>Tools</th>
-          <th>Sandbox</th>
-          <th>Config Locations</th>
-          <th>Skills</th>
-          <th>MCP</th>
-          <th>Providers</th>
-          <th>Compaction</th>
-          <th>Auto-Retry</th>
-          <th>Integration</th>
-        </tr>
-      </thead>
-      <tbody>
-        {harnesses.map((h) => {
-          const id = getFieldSafe(h, 'id').value;
-          const name = getFieldSafe(h, 'name').value;
-
-          const editMechs = safeArray(getFieldSafe(h, 'edit', 'mechanism').value);
-          const editDefault = getFieldSafe(h, 'edit', 'mechanism_default').value;
-          const tools = safeArray(getFieldSafe(h, 'tools', 'available').value);
-          const sandboxVal = String(getFieldSafe(h, 'tools', 'sandbox').value ?? '');
-          const configLocs = safeArray(getFieldSafe(h, 'config', 'locations').value);
-          const skillsVal = getFieldSafe(h, 'extensions', 'skills', 'supported').value;
-          const mcpVal = String(getFieldSafe(h, 'extensions', 'mcp').value ?? '');
-          const providers = safeArray(getFieldSafe(h, 'providers', 'supported').value);
-          const compaction = String(getFieldSafe(h, 'context', 'compaction').value ?? '');
-          const autoRetryVal = String(getFieldSafe(h, 'reliability', 'auto_retry').value ?? '');
-          const modes = getFieldSafe(h, 'integration', 'modes').value;
-          const platforms = safeArray(getFieldSafe(h, 'platforms').value);
-
-          const hasMcp = mcpVal && !mcpVal.includes('No ') && mcpVal !== 'null' && mcpVal !== 'None';
-          const hasSandbox = sandboxVal && !sandboxVal.includes('No built-in') && !sandboxVal.startsWith('No ');
-          const hasAutoRetry = autoRetryVal.includes('Automatic') || autoRetryVal.includes('automatic') || autoRetryVal.includes('retries');
-
-          const modesDisplay = Array.isArray(modes) ? modes.join(', ') : String(modes ?? '');
-
-          return (
-            <tr
-              data-os={platforms.join(',')}
-              data-edit={editMechs.join(',')}
-              data-mcp={hasMcp ? 'yes' : 'no'}
-              data-sandbox={hasSandbox ? 'yes' : 'no'}
-            >
-              <td><a href={`/h/${id}`} class="accent mono">{name}</a></td>
-              <td>{editMechs.join(', ') || '—'}</td>
-              <td>{editDefault ?? '—'}</td>
-              <td>{tools.length} tools</td>
-              <td>{truncate(sandboxVal, 60) || '—'}</td>
-              <td>{configLocs.length}</td>
-              <td>{yesNo(!!skillsVal)}</td>
-              <td>{truncate(hasMcp ? mcpVal : 'None', 40)}</td>
-              <td>{providers.length}</td>
-              <td>{truncate(compaction, 50) || '—'}</td>
-              <td>{yesNo(hasAutoRetry)}</td>
-              <td>{truncate(modesDisplay, 50) || '—'}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
+<BaseLayout title="Compare">
+  <section class="card" style="max-width:42rem;margin:0 auto;">
+    <h2 style="margin-bottom:var(--sp-3);">Comparison Matrix Moved</h2>
+    <p class="muted" style="margin-bottom:var(--sp-5);">
+      The full field-by-field comparison matrix is now the homepage.
+    </p>
+    <a href="/" class="cta-link mono">Open matrix homepage →</a>
+  </section>
 </BaseLayout>
 
-<script>
-  const btns = document.querySelectorAll<HTMLButtonElement>('.filter-btn');
-  const rows = document.querySelectorAll<HTMLTableRowElement>('.matrix-table tbody tr');
-
-  const active: Record<string, Set<string>> = {};
-
-  btns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const filter = btn.dataset.filter!;
-      const value = btn.dataset.value!;
-
-      if (!active[filter]) active[filter] = new Set();
-
-      if (active[filter].has(value)) {
-        active[filter].delete(value);
-        btn.classList.remove('active');
-      } else {
-        active[filter].add(value);
-        btn.classList.add('active');
-      }
-
-      applyFilters();
-    });
-  });
-
-  function applyFilters() {
-    rows.forEach((row) => {
-      let visible = true;
-
-      for (const [filter, values] of Object.entries(active)) {
-        if (values.size === 0) continue;
-        const rowVal = row.dataset[filter] || '';
-        const rowVals = rowVal.split(',');
-        const match = [...values].some((v) => rowVals.includes(v));
-        if (!match) {
-          visible = false;
-          break;
-        }
-      }
-
-      row.style.display = visible ? '' : 'none';
-    });
+<style>
+  .cta-link {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-size: var(--fs-sm);
   }
-</script>
+</style>

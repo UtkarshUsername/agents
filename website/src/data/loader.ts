@@ -91,6 +91,28 @@ export function getRepoBaseUrl(harness: Harness): string | null {
   return `${cleanUrl}/blob/${commit}`;
 }
 
+function getRepoNameFromUrl(url: string): string | null {
+  const cleanUrl = url.replace(/\.git$/, '');
+  const match = cleanUrl.match(/\/([^/]+)$/);
+  if (!match) return null;
+  return match[1];
+}
+
+function normalizeRepoRelativeRefPath(harness: Harness, refPath: string): string {
+  const repoUrl = getFieldSafe(harness, 'repo', 'url').value;
+  if (!repoUrl) return refPath;
+
+  const repoName = getRepoNameFromUrl(String(repoUrl));
+  if (!repoName) return refPath;
+
+  if (refPath === repoName) return '';
+  if (refPath.startsWith(`${repoName}/`)) {
+    return refPath.slice(repoName.length + 1);
+  }
+
+  return refPath;
+}
+
 export function makeEvidenceUrl(
   harness: Harness,
   ref: string,
@@ -100,15 +122,32 @@ export function makeEvidenceUrl(
   // code refs: path/to/file.ext:123
   const match = ref.match(/^(.+?):(\d+)$/);
   if (match) {
-    return `${base}/${match[1]}#L${match[2]}`;
+    const filePath = normalizeRepoRelativeRefPath(harness, match[1]);
+    return `${base}/${filePath}#L${match[2]}`;
   }
   // file path without line
   if (ref.includes('/') && !ref.startsWith('http')) {
-    return `${base}/${ref}`;
+    const filePath = normalizeRepoRelativeRefPath(harness, ref);
+    return `${base}/${filePath}`;
   }
   // already a URL
   if (ref.startsWith('http')) return ref;
   return null;
+}
+
+function anchorSlug(input: string): string {
+  return String(input)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+export function makeSectionAnchor(sectionKey: string): string {
+  return `section-${anchorSlug(sectionKey)}`;
+}
+
+export function makeFieldAnchor(sectionKey: string, fieldKey: string): string {
+  return `field-${anchorSlug(sectionKey)}-${anchorSlug(fieldKey)}`;
 }
 
 export function loadContributing(): string {

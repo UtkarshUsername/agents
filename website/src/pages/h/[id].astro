@@ -6,6 +6,8 @@ import {
   getFieldSafe,
   getSections,
   makeEvidenceUrl,
+  makeSectionAnchor,
+  makeFieldAnchor,
 } from '../../data/loader';
 import type { Evidence, Field, Section, SectionField } from '../../data/loader';
 
@@ -102,7 +104,7 @@ function evUrl(ev: Evidence): string | null {
   {sections.map((section, si) => {
     const stagger = Math.min(si + 1, 4);
     return (
-      <section class={`fade-in-up stagger-${stagger}`}>
+      <section id={makeSectionAnchor(section.key)} class={`fade-in-up stagger-${stagger}`}>
         <div class="section-header">
           <h2>{section.name}</h2>
         </div>
@@ -119,7 +121,7 @@ function evUrl(ev: Evidence): string | null {
             const plainObj = !objArr && isPlainObject(val);
 
             return (
-              <div class="card" style="padding:var(--sp-4) var(--sp-6);">
+              <div id={makeFieldAnchor(section.key, sf.key)} class="card" style="padding:var(--sp-4) var(--sp-6);">
                 <div style="display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--sp-3);margin-bottom:var(--sp-2);">
                   <span class="mono" style="font-weight:600;font-size:var(--fs-sm);color:var(--c-text-heading);">
                     {sf.label}

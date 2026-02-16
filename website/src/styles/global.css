@@ -319,6 +319,12 @@ footer {
   font-family: var(--font-mono);
 }
 
+/* --- Anchor Offsets --- */
+[id^="section-"],
+[id^="field-"] {
+  scroll-margin-top: calc(var(--sp-16) + var(--sp-8));
+}
+
 /* --- Animations --- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }

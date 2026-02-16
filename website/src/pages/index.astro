@@ -1,128 +1,193 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { loadAllHarnesses, getFieldSafe } from '../data/loader.ts';
+import {
+  loadAllHarnesses,
+  getFieldSafe,
+  getSections,
+  makeFieldAnchor,
+} from '../data/loader.ts';
 
 const harnesses = loadAllHarnesses();
 
-const questions = [
-  {
-    title: 'Do you need cross-model reliability?',
-    description: 'Some harnesses are tightly coupled to one provider; others abstract the model layer so you can swap freely.',
-    strong: ['OpenCode', 'Pi'],
-  },
-  {
-    title: 'Do you need strong sandboxing?',
-    description: 'OS-level sandboxing (seccomp, seatbelt) that restricts what the agent can touch.',
-    strong: ['Codex CLI'],
-  },
-  {
-    title: 'Do you want a rich skills/plugins ecosystem?',
-    description: 'Pre-built capabilities the community can share, install, and compose without modifying core code.',
-    strong: ['OpenCode', 'Pi', 'Codex CLI'],
-  },
-  {
-    title: 'Do you care about a first-class TUI experience?',
-    description: 'A polished terminal interface with streaming output, key bindings, and themes.',
-    strong: ['OpenCode', 'Pi', 'Codex CLI'],
-  },
-  {
-    title: 'Do you need SDK/API integration?',
-    description: 'Use the harness as a library inside your own application or CI pipeline.',
-    strong: ['Codex CLI', 'OpenCode', 'Pi'],
-  },
-  {
-    title: 'Do you need MCP support?',
-    description: 'Connect to external tool servers via the Model Context Protocol for extended capabilities.',
-    strong: ['Codex CLI', 'OpenCode'],
-  },
-];
+const harnessColumns = harnesses.map((h) => {
+  const id = getFieldSafe(h, 'id').value;
+  const name = getFieldSafe(h, 'name').value;
+  return {
+    id: String(id ?? ''),
+    name: String(name ?? id ?? 'Unknown'),
+  };
+});
+
+const matrixSections = [];
+const sectionLookup = new Map();
+
+for (let harnessIndex = 0; harnessIndex < harnesses.length; harnessIndex += 1) {
+  const harness = harnesses[harnessIndex];
+  const sections = getSections(harness);
+
+  for (const section of sections) {
+    let matrixSection = sectionLookup.get(section.key);
+    if (!matrixSection) {
+      matrixSection = {
+        key: section.key,
+        name: section.name,
+        rows: [],
+        rowLookup: new Map(),
+      };
+      sectionLookup.set(section.key, matrixSection);
+      matrixSections.push(matrixSection);
+    }
+
+    for (const field of section.fields) {
+      let row = matrixSection.rowLookup.get(field.key);
+      if (!row) {
+        row = {
+          key: field.key,
+          label: field.label,
+          cells: Array(harnesses.length).fill(null),
+        };
+        matrixSection.rowLookup.set(field.key, row);
+        matrixSection.rows.push(row);
+      }
+      row.cells[harnessIndex] = field.field;
+    }
+  }
+}
+
+function clip(input: string, max = 200): string {
+  if (input.length <= max) return input;
+  return `${input.slice(0, max - 1)}…`;
+}
+
+function summarizeValue(value: any): string {
+  if (value == null) return '—';
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) return '—';
+
+    const primitiveArray = value.every(
+      (item) => ['string', 'number', 'boolean'].includes(typeof item),
+    );
+    if (primitiveArray) {
+      return String(value.join(', '));
+    }
+
+    const modeArray = value.every(
+      (item) => item && typeof item === 'object' && 'mode' in item,
+    );
+    if (modeArray) {
+      return value
+        .map((item) =>
+          item.detail ? `${String(item.mode)}: ${String(item.detail)}` : String(item.mode),
+        )
+        .join('; ');
+    }
+
+    return value.map((item) => summarizeValue(item)).join('; ');
+  }
+
+  if (typeof value === 'object') {
+    const entries = Object.entries(value);
+    if (entries.length === 0) return '—';
+    return entries
+      .slice(0, 4)
+      .map(([k, v]) => `${k}=${String(v)}`)
+      .join(', ');
+  }
+
+  return String(value);
+}
+
+function cellText(field: any): string {
+  if (!field || typeof field !== 'object') return '—';
+  return clip(summarizeValue(field.value), 220);
+}
 ---
 
-<BaseLayout title="Home">
-  <!-- Hero -->
+<BaseLayout title="Harness Matrix" description="Under-the-hood comparison matrix of agent harness behavior, architecture, and reliability.">
   <section class="hero fade-in">
-    <p class="hero__label mono muted">Source-backed comparison of AI coding agent harnesses</p>
+    <p class="hero__label mono muted">Source-backed harness internals matrix</p>
     <h1 class="hero__title">Harness Matrix</h1>
     <p class="hero__subtitle">
-      Source-backed comparison of AI coding agent harnesses. Every claim has evidence.
+      Compare how agent harnesses actually work under the hood, field by field.
     </p>
     <p class="hero__body">
-      The harness — the scaffolding around the LLM — often determines real-world success more than the model itself.
-      Changing only the edit tool can produce large jumps in success rate.
-      This matrix documents harness behavior so you can pick the right one.
+      This is an implementation matrix, not a model leaderboard. It helps you inspect design choices
+      like edit mechanisms, tool schemas, sandbox boundaries, retry loops, context compaction, and
+      integration modes so you can reason about reliability and benchmarking methodology.
     </p>
     <div class="hero__ctas">
-      <a href="/compare" class="cta cta--primary">Compare harnesses →</a>
+      <a href="#matrix" class="cta cta--primary">Jump to matrix ↓</a>
       <a href="/contribute" class="cta cta--secondary">How to contribute</a>
     </div>
   </section>
 
-  <!-- Pick a Harness -->
-  <section>
+  <section id="matrix">
     <div class="section-header fade-in-up stagger-1">
-      <h2>Pick a Harness</h2>
+      <h2>Under-The-Hood Matrix</h2>
     </div>
-    <div class="grid grid--3">
-      {questions.map((q, i) => (
-        <a href="/compare" class={`card question-card fade-in-up stagger-${(i % 4) + 1}`}>
-          <h4 class="question-card__title">{q.title}</h4>
-          <p class="question-card__desc muted">{q.description}</p>
-          <div class="question-card__tags">
-            {q.strong.map((name) => (
-              <span class="badge badge--high">{name}</span>
-            ))}
-          </div>
-        </a>
-      ))}
-    </div>
-  </section>
 
-  <!-- All Harnesses -->
-  <section>
-    <div class="section-header fade-in-up stagger-2">
-      <h2>All Harnesses</h2>
-    </div>
-    <div class="grid grid--3">
-      {harnesses.map((h, i) => {
-        const id = getFieldSafe(h, 'id').value;
-        const name = getFieldSafe(h, 'name').value;
-        const license = getFieldSafe(h, 'license').value;
-        const language = getFieldSafe(h, 'primary_language').value;
-        const mechanisms = getFieldSafe(h, 'edit', 'mechanism').value;
-        return (
-          <a href={`/h/${id}`} class={`card harness-card fade-in-up stagger-${(i % 4) + 1}`}>
-            <h3 class="harness-card__name">{name ?? id}</h3>
-            <dl class="harness-card__meta">
-              {license && (
-                <>
-                  <dt class="muted">License</dt>
-                  <dd>{license}</dd>
-                </>
-              )}
-              {language && (
-                <>
-                  <dt class="muted">Language</dt>
-                  <dd>{language}</dd>
-                </>
-              )}
-            </dl>
-            {Array.isArray(mechanisms) && mechanisms.length > 0 && (
-              <div class="harness-card__badges">
-                {mechanisms.map((m: string) => (
-                  <span class="badge badge--medium">{m}</span>
-                ))}
-              </div>
-            )}
-            <span class="harness-card__link accent mono">View details →</span>
-          </a>
-        );
-      })}
+    <p class="matrix-note muted">
+      Rows are capability/behavior fields. Columns are harnesses. For full evidence and raw citations,
+      open a harness detail page from the column header.
+    </p>
+
+    <div class="matrix-home-wrap fade-in-up stagger-2">
+      <table class="matrix-home-table">
+        <thead>
+          <tr>
+            <th class="top-left">Information Field</th>
+            {harnessColumns.map((col) => (
+              <th>
+                <a href={`/h/${col.id}`} class="agent-head-link">
+                  {col.name}
+                </a>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {matrixSections.map((section) => (
+            <>
+              <tr class="section-row">
+                <th colspan={harnessColumns.length + 1}>
+                  {section.name}
+                </th>
+              </tr>
+              {section.rows.map((row) => (
+                <tr>
+                  <th class="field-col">
+                    <span class="field-label">{row.label}</span>
+                    <span class="field-key mono muted">{row.key}</span>
+                  </th>
+                  {row.cells.map((cell, cellIndex) => (
+                    <td>
+                      {harnessColumns[cellIndex]?.id ? (
+                        <a
+                          class="cell-link"
+                          href={`/h/${harnessColumns[cellIndex].id}#${makeFieldAnchor(section.key, row.key)}`}
+                        >
+                          <p class="cell-value">{cellText(cell)}</p>
+                          {cell?.confidence && (
+                            <span class={`badge badge--${cell.confidence}`}>{cell.confidence}</span>
+                          )}
+                        </a>
+                      ) : (
+                        <p class="cell-value">{cellText(cell)}</p>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </>
+          ))}
+        </tbody>
+      </table>
     </div>
   </section>
 </BaseLayout>
 
 <style>
-  /* Hero */
   .hero {
     padding: var(--sp-16) 0 var(--sp-12);
     border-bottom: 1px solid var(--c-border);
@@ -158,7 +223,6 @@ const questions = [
     flex-wrap: wrap;
   }
 
-  /* CTAs */
   .cta {
     display: inline-flex;
     align-items: center;
@@ -186,54 +250,114 @@ const questions = [
     color: var(--c-accent);
   }
 
-  /* Question Cards */
-  .question-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-  }
-  .question-card__title {
-    font-size: var(--fs-base);
-  }
-  .question-card__desc {
+  .matrix-note {
+    margin-bottom: var(--sp-4);
     font-size: var(--fs-sm);
-    flex: 1;
-  }
-  .question-card__tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2);
-    margin-top: auto;
   }
 
-  /* Harness Cards */
-  .harness-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
+  .matrix-home-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-lg);
+    background: linear-gradient(
+      180deg,
+      rgba(24, 26, 33, 0.55) 0%,
+      rgba(17, 19, 24, 0.65) 100%
+    );
   }
-  .harness-card__name {
-    font-size: var(--fs-lg);
+
+  .matrix-home-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: separate;
+    border-spacing: 0;
   }
-  .harness-card__meta {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--sp-1) var(--sp-3);
-    font-size: var(--fs-sm);
+
+  .matrix-home-table th,
+  .matrix-home-table td {
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--c-border-subtle);
+    vertical-align: top;
   }
-  .harness-card__meta dt {
+
+  .matrix-home-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 4;
+    background: var(--c-surface-raise);
+    border-bottom: 1px solid var(--c-border);
     font-family: var(--font-mono);
-    font-size: var(--fs-xs);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    white-space: nowrap;
   }
-  .harness-card__badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2);
+
+  .matrix-home-table .top-left {
+    left: 0;
+    z-index: 5;
   }
-  .harness-card__link {
+
+  .agent-head-link {
+    color: var(--c-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .section-row th {
+    background: rgba(45, 212, 191, 0.08);
+    color: var(--c-text-heading);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    border-bottom: 1px solid var(--c-border);
+  }
+
+  .field-col {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    width: 20rem;
+    min-width: 20rem;
+    background: var(--c-surface);
+    border-right: 1px solid var(--c-border);
+  }
+
+  .field-label {
+    display: block;
+    color: var(--c-text-heading);
     font-size: var(--fs-sm);
-    margin-top: auto;
+    margin-bottom: var(--sp-1);
+  }
+
+  .field-key {
+    display: block;
+    font-size: var(--fs-sm);
+    word-break: break-word;
+  }
+
+  .cell-value {
+    color: var(--c-text);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    margin-bottom: var(--sp-2);
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .cell-link {
+    display: block;
+    color: inherit;
+  }
+
+  .cell-link:hover .cell-value {
+    color: var(--c-text-heading);
+  }
+
+  .matrix-home-table tbody tr:hover td,
+  .matrix-home-table tbody tr:hover .field-col {
+    background: rgba(45, 212, 191, 0.06);
   }
 </style>
