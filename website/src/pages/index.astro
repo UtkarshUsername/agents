@@ -105,23 +105,6 @@ function cellText(field: any): string {
 ---
 
 <BaseLayout title="Harness Matrix" description="Under-the-hood comparison matrix of agent harness behavior, architecture, and reliability.">
-  <section class="hero fade-in">
-    <p class="hero__label mono muted">Source-backed harness internals matrix</p>
-    <h1 class="hero__title">Harness Matrix</h1>
-    <p class="hero__subtitle">
-      Compare how agent harnesses actually work under the hood, field by field.
-    </p>
-    <p class="hero__body">
-      This is an implementation matrix, not a model leaderboard. It helps you inspect design choices
-      like edit mechanisms, tool schemas, sandbox boundaries, retry loops, context compaction, and
-      integration modes so you can reason about reliability and benchmarking methodology.
-    </p>
-    <div class="hero__ctas">
-      <a href="#matrix" class="cta cta--primary">Jump to matrix ↓</a>
-      <a href="/contribute" class="cta cta--secondary">How to contribute</a>
-    </div>
-  </section>
-
   <section id="matrix">
     <div class="section-header fade-in-up stagger-1">
       <h2>Under-The-Hood Matrix</h2>
@@ -188,68 +171,6 @@ function cellText(field: any): string {
 </BaseLayout>
 
 <style>
-  .hero {
-    padding: var(--sp-16) 0 var(--sp-12);
-    border-bottom: 1px solid var(--c-border);
-    margin-bottom: var(--sp-8);
-  }
-  .hero__label {
-    font-size: var(--fs-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: var(--sp-3);
-  }
-  .hero__title {
-    font-size: clamp(2.25rem, 5vw, 3.5rem);
-    letter-spacing: -0.03em;
-    margin-bottom: var(--sp-4);
-  }
-  .hero__subtitle {
-    font-family: var(--font-mono);
-    font-size: var(--fs-md);
-    color: var(--c-text-heading);
-    max-width: 42rem;
-    margin-bottom: var(--sp-4);
-  }
-  .hero__body {
-    max-width: 42rem;
-    color: var(--c-text-muted);
-    margin-bottom: var(--sp-8);
-    line-height: var(--lh);
-  }
-  .hero__ctas {
-    display: flex;
-    gap: var(--sp-4);
-    flex-wrap: wrap;
-  }
-
-  .cta {
-    display: inline-flex;
-    align-items: center;
-    font-family: var(--font-mono);
-    font-size: var(--fs-sm);
-    font-weight: 600;
-    padding: var(--sp-3) var(--sp-6);
-    border-radius: var(--r-md);
-    transition: all var(--transition);
-  }
-  .cta--primary {
-    background: var(--c-accent);
-    color: var(--c-bg);
-  }
-  .cta--primary:hover {
-    background: var(--c-accent-dim);
-    color: var(--c-text-heading);
-  }
-  .cta--secondary {
-    border: 1px solid var(--c-border);
-    color: var(--c-text);
-  }
-  .cta--secondary:hover {
-    border-color: var(--c-accent-dim);
-    color: var(--c-accent);
-  }
-
   .matrix-note {
     margin-bottom: var(--sp-4);
     font-size: var(--fs-sm);
