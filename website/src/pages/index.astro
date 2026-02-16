@@ -115,7 +115,24 @@ function cellText(field: any): string {
       open a harness detail page from the column header.
     </p>
 
-    <div class="matrix-home-wrap fade-in-up stagger-2">
+    <!-- Section Jump Nav -->
+    <nav class="section-jump fade-in-up stagger-2" aria-label="Jump to section">
+      <span class="section-jump__label">Sections</span>
+      <div class="section-jump__track">
+        {matrixSections.map((section, i) => (
+          <a
+            href={`#section-${section.key}`}
+            class="section-jump__pill"
+            style={`animation-delay: ${120 + i * 40}ms`}
+          >
+            <span class="section-jump__index">{String(i + 1).padStart(2, '0')}</span>
+            {section.name}
+          </a>
+        ))}
+      </div>
+    </nav>
+
+    <div class="matrix-home-wrap fade-in-up stagger-3">
       <table class="matrix-home-table">
         <thead>
           <tr>
@@ -132,7 +149,7 @@ function cellText(field: any): string {
         <tbody>
           {matrixSections.map((section) => (
             <>
-              <tr class="section-row">
+              <tr class="section-row" id={`section-${section.key}`}>
                 <th colspan={harnessColumns.length + 1}>
                   {section.name}
                 </th>
@@ -168,6 +185,51 @@ function cellText(field: any): string {
       </table>
     </div>
   </section>
+
+  <!-- Back to Top -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M9 14V4M9 4L4.5 8.5M9 4L13.5 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="back-to-top__label">TOP</span>
+  </button>
+
+  <script>
+    const btn = document.getElementById('backToTop');
+    const jumpNav = document.querySelector('.section-jump');
+    let ticking = false;
+
+    function onScroll() {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const show = window.scrollY > 600;
+          btn?.classList.toggle('visible', show);
+
+          // Highlight active section in jump nav
+          const sections = document.querySelectorAll('.section-row[id]');
+          let activeKey = '';
+          for (const sec of sections) {
+            if (sec.getBoundingClientRect().top <= 160) {
+              activeKey = sec.id;
+            }
+          }
+          document.querySelectorAll('.section-jump__pill').forEach((pill) => {
+            const href = pill.getAttribute('href');
+            pill.classList.toggle('active', href === `#${activeKey}`);
+          });
+
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    btn?.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
 </BaseLayout>
 
 <style>
@@ -280,5 +342,162 @@ function cellText(field: any): string {
   .matrix-home-table tbody tr:hover td,
   .matrix-home-table tbody tr:hover .field-col {
     background: rgba(45, 212, 191, 0.06);
+  }
+
+  /* --- Row hover accent bar --- */
+  .matrix-home-table tbody tr {
+    position: relative;
+  }
+
+  .matrix-home-table tbody tr:not(.section-row) td:first-child,
+  .matrix-home-table tbody tr:not(.section-row) .field-col {
+    position: relative;
+  }
+
+  .matrix-home-table tbody tr:not(.section-row) .field-col::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--c-accent);
+    border-radius: 1px;
+    opacity: 0;
+    transform: scaleY(0.4);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  .matrix-home-table tbody tr:not(.section-row):hover .field-col::before {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+
+  .matrix-home-table tbody tr:not(.section-row):hover .field-label {
+    color: var(--c-accent);
+    transition: color 180ms ease;
+  }
+
+  /* --- Section Jump Nav --- */
+  .section-jump {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-4) 0;
+    margin-bottom: var(--sp-4);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .section-jump::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-jump__label {
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding-right: var(--sp-2);
+    border-right: 1px solid var(--c-border);
+  }
+
+  .section-jump__track {
+    display: flex;
+    gap: var(--sp-2);
+    flex-shrink: 0;
+  }
+
+  .section-jump__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    color: var(--c-text-muted);
+    padding: var(--sp-1) var(--sp-3);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-sm);
+    white-space: nowrap;
+    transition: color 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+    animation: fadeInUp 400ms ease both;
+  }
+
+  .section-jump__pill:hover {
+    color: var(--c-text-heading);
+    border-color: var(--c-text-muted);
+    background: var(--c-surface-raise);
+  }
+
+  .section-jump__pill.active {
+    color: var(--c-accent);
+    border-color: var(--c-accent-dim);
+    background: var(--c-accent-bg);
+    box-shadow: 0 0 8px rgba(45, 212, 191, 0.1);
+  }
+
+  .section-jump__index {
+    color: var(--c-accent-dim);
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    opacity: 0.7;
+    transition: opacity 180ms ease;
+  }
+
+  .section-jump__pill:hover .section-jump__index,
+  .section-jump__pill.active .section-jump__index {
+    opacity: 1;
+  }
+
+  /* --- Back to Top --- */
+  .back-to-top {
+    position: fixed;
+    bottom: var(--sp-8);
+    right: var(--sp-8);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--sp-3);
+    background: var(--c-surface-raise);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-md);
+    color: var(--c-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 280ms ease, transform 280ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    backdrop-filter: blur(6px);
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    color: var(--c-accent);
+    border-color: var(--c-accent-dim);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.15);
+  }
+
+  .back-to-top:active {
+    transform: translateY(-2px);
+  }
+
+  .back-to-top__label {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 </style>
