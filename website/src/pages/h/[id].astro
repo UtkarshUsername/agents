@@ -223,12 +223,35 @@ function evUrl(ev: Evidence): string | null {
     );
   })}
 
+  <!-- Back to Top -->
+  <button class="back-to-top" id="backToTop" aria-label="Back to top" title="Back to top">
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <path d="M9 14V4M9 4L4.5 8.5M9 4L13.5 8.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span class="back-to-top__label">TOP</span>
+  </button>
+
   <script>
     document.querySelectorAll('.evidence-toggle').forEach(btn => {
       btn.addEventListener('click', () => {
         const item = btn.closest('.evidence-item');
         item?.classList.toggle('expanded');
       });
+    });
+
+    const backBtn = document.getElementById('backToTop');
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          backBtn?.classList.toggle('visible', window.scrollY > 600);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+    backBtn?.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
 </BaseLayout>
@@ -268,5 +291,52 @@ function evUrl(ev: Evidence): string | null {
       gap: var(--sp-1);
       padding: var(--sp-2) var(--sp-3);
     }
+  }
+
+  /* --- Back to Top --- */
+  .back-to-top {
+    position: fixed;
+    bottom: var(--sp-8);
+    right: var(--sp-8);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: var(--sp-3);
+    background: var(--c-surface-raise);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r-md);
+    color: var(--c-text-muted);
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(12px);
+    transition: opacity 280ms ease, transform 280ms ease, color 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    backdrop-filter: blur(6px);
+  }
+
+  .back-to-top.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    color: var(--c-accent);
+    border-color: var(--c-accent-dim);
+    box-shadow: 0 0 12px rgba(45, 212, 191, 0.15);
+  }
+
+  .back-to-top:active {
+    transform: translateY(-2px);
+  }
+
+  .back-to-top__label {
+    font-family: var(--font-mono);
+    font-size: 0.5625rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 </style>
