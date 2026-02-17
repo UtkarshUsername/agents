@@ -280,12 +280,28 @@ nav a:hover, nav a[aria-current] {
   border-radius: var(--r-sm);
   padding: var(--sp-3) var(--sp-4);
   font-size: var(--fs-sm);
-  max-height: 3.6em;
-  overflow: hidden;
-  transition: max-height 300ms ease, border-color var(--transition);
+  transition: border-color var(--transition);
 }
-.evidence-item.expanded {
-  max-height: 40rem;
+.evidence-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.evidence-ref {
+  font-size: var(--fs-xs);
+  color: var(--c-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+  min-width: 0;
+}
+.evidence-body {
+  display: none;
+  margin-top: var(--sp-2);
+}
+.evidence-item.expanded .evidence-body {
+  display: block;
 }
 .evidence-item:hover {
   border-color: var(--c-border);
