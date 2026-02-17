@@ -33,11 +33,19 @@ const harnesses = loadAllHarnesses().map((h) => {
   </head>
   <body>
     <nav>
-      <div class="container" style="display:flex;align-items:center;justify-content:space-between;">
-        <a href="/" style="font-family:var(--font-mono);font-size:var(--fs-md);font-weight:700;color:var(--c-text-heading);letter-spacing:-0.02em;">
+      <div class="container nav-inner">
+        <a href="/" class="nav-logo">
           <span style="color:var(--c-accent);">▪</span> Agents
         </a>
-        <div style="display:flex;align-items:center;gap:var(--sp-6);">
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">
+          <svg class="nav-toggle__open" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M3 5h14M3 10h14M3 15h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <svg class="nav-toggle__close" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="nav-links" id="navLinks">
           <a href="/">Home</a>
           {harnesses.map((h) => (
             <a href={`/h/${h.id}`}>{h.name}</a>
@@ -49,7 +57,7 @@ const harnesses = loadAllHarnesses().map((h) => {
       </div>
     </nav>
 
-    <main class="container" style="padding-top:var(--sp-16);padding-bottom:var(--sp-12);">
+    <main class="container main-content">
       <slot />
     </main>
 
@@ -58,5 +66,95 @@ const harnesses = loadAllHarnesses().map((h) => {
         Agents · Source-backed harness comparison · Every claim has evidence
       </div>
     </footer>
+    <script>
+      const toggle = document.getElementById('navToggle');
+      const links = document.getElementById('navLinks');
+      toggle?.addEventListener('click', () => {
+        const open = links?.classList.toggle('open');
+        toggle.setAttribute('aria-expanded', String(!!open));
+      });
+      links?.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          links.classList.remove('open');
+          toggle?.setAttribute('aria-expanded', 'false');
+        });
+      });
+    </script>
   </body>
 </html>
+
+<style>
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .nav-logo {
+    font-family: var(--font-mono);
+    font-size: var(--fs-md);
+    font-weight: 700;
+    color: var(--c-text-heading);
+    letter-spacing: -0.02em;
+  }
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-6);
+  }
+  .nav-toggle {
+    display: none;
+    color: var(--c-text-muted);
+    padding: var(--sp-2);
+  }
+  .nav-toggle__close {
+    display: none;
+  }
+  .main-content {
+    padding-top: var(--sp-16);
+    padding-bottom: var(--sp-12);
+  }
+  .nav-links.open .nav-toggle__open { display: none; }
+  .nav-links.open .nav-toggle__close { display: block; }
+
+  @media (max-width: 768px) {
+    .nav-toggle {
+      display: flex;
+      align-items: center;
+      z-index: 110;
+    }
+    .nav-toggle__close { display: none; }
+    .nav-links.open ~ .nav-toggle .nav-toggle__open { display: none; }
+    /* When open, the toggle shows ✕ — handled via JS aria-expanded */
+    .nav-toggle[aria-expanded="true"] .nav-toggle__open { display: none; }
+    .nav-toggle[aria-expanded="true"] .nav-toggle__close { display: block; }
+
+    .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      background: rgba(10, 11, 15, 0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--c-border);
+      padding: var(--sp-2) var(--sp-6);
+    }
+    .nav-links.open {
+      display: flex;
+    }
+    .nav-links a {
+      padding: var(--sp-3) 0;
+      border-bottom: 1px solid var(--c-border-subtle);
+    }
+    .nav-links a:last-child {
+      border-bottom: none;
+    }
+    .main-content {
+      padding-top: var(--sp-8);
+      padding-bottom: var(--sp-8);
+    }
+  }
+</style>

@@ -565,4 +565,62 @@ function cellText(field: any): string {
     color: var(--c-border);
     margin: 0 var(--sp-1);
   }
+
+  /* --- Mobile --- */
+  @media (max-width: 768px) {
+    .matrix-home-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-left: calc(-1 * var(--sp-4));
+      margin-right: calc(-1 * var(--sp-4));
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+
+    .matrix-home-table {
+      min-width: 700px;
+    }
+
+    .field-col {
+      width: 12rem;
+      min-width: 12rem;
+    }
+
+    .section-jump {
+      margin-left: calc(-1 * var(--sp-4));
+      margin-right: calc(-1 * var(--sp-4));
+      padding-left: var(--sp-4);
+      padding-right: var(--sp-4);
+    }
+
+    .section-jump__label {
+      display: none;
+    }
+
+    .confidence-legend {
+      font-size: 0.625rem;
+      gap: var(--sp-1);
+      padding: var(--sp-2) var(--sp-3);
+    }
+
+    .back-to-top {
+      bottom: var(--sp-4);
+      right: var(--sp-4);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .matrix-home-wrap {
+      margin-left: calc(-1 * var(--sp-3));
+      margin-right: calc(-1 * var(--sp-3));
+    }
+
+    .section-jump {
+      margin-left: calc(-1 * var(--sp-3));
+      margin-right: calc(-1 * var(--sp-3));
+      padding-left: var(--sp-3);
+      padding-right: var(--sp-3);
+    }
+  }
 </style>
