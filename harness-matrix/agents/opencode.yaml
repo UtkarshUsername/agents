@@ -46,7 +46,7 @@ license:
       quote: '"license": "MIT"'
 primary_language:
   value: TypeScript
-  confidence: medium
+  confidence: high
   evidence:
     - kind: code
       ref: opencode/packages/opencode/package.json:9
